@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block body %}
+{% if error %}<p><strong>Error:</strong></p>{{ error }}{% endif %}
+<form method="post" action="{{ url_for('login') }}">
+    {{ form.csrf_token }}
+    {{ form.username.label }} {{ form.username(size=20) }}
+    {{ form.password.label }} {{ form.password(size=20) }}
+    <input type="submit" value="Login">
+</form>
+{% endblock %}
