@@ -2,11 +2,11 @@
 <!DOCTYPE html>
 {% extends "layout.html" %}
 {% block body %}
-<ul class=entries>
-    {% for entry in entries %}
-    <li>{{ entry.username }} ||| {{ entry.password }}
-        {% else %}
-    <li><em>NO ENTRIES</em>
+    <ul class=entries>
+        {% for entry in entries %}
+            <li>{{ entry.username }} ||| {{ entry.password }}
+                {% else %}
+            <li><em>NO ENTRIES</em>
         {% endfor %}
-</ul>
+    </ul>
 {% endblock %}
