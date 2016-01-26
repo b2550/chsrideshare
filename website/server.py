@@ -1,4 +1,3 @@
-import os
 import sqlite3
 from contextlib import closing
 
@@ -11,7 +10,7 @@ from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 
 # <editor-fold desc="Config and Init">
 # TODO: add more config
-DATABASE = '/Users/b2550/Documents/PycharmProjects/chsrideshare/website/database.db'
+DATABASE = 'database.db'
 DEBUG = True
 # TODO: Remember to change this!
 SECRET_KEY = 'SQIZ9zxyckj4h-9=ssdu&s!y42s7%bv#k+d(!n8u(s&1ifi)fo2degIT'
@@ -175,30 +174,17 @@ def logout():
 
 # TODO: DEBUG: REMOVE THIS: ADD FIRST RUN OVERRIDE FOR LOGIN PAGE TO CREATE ADMIN ACCOUNT
 
-
-# @app.route('/makeadmin')
-# def makeadmin():
-#     a_salt = os.urandom(32)
-#     g.db.execute('INSERT INTO users (username, password, email, salt, type) VALUES (?, ?, ?, ?, ?)',
-#                  ["admin", "admin", "admin@admin.com", sqlite3.Binary(a_salt), "admin"])
-#     g.db.commit()
-#     db = get_db()
-#     cur = db.execute('SELECT username, password FROM users ORDER BY id DESC')
-#     entries = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-#     return render_template('makeadmin.html', entries=entries)
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            a_salt = sqlite3.Binary(os.urandom(32))
             username = form.username.data
             password = bcrypt.generate_password_hash(form.password.data)
             email = form.email.data
             utype = form.type.data
-            g.db.execute('INSERT INTO users (username, password, email, salt, type) VALUES (?, ?, ?, ?, ?)',
-                         [username, password, email, a_salt, utype])
+            g.db.execute('INSERT INTO users (username, password, email, type) VALUES (?, ?, ?, ?)',
+                         [username, password, email, utype])
             g.db.commit()
             flash('Registered the user ' + username)
             return render_template('register.html', form=form)
@@ -218,6 +204,11 @@ def listusers():
     entries = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
     return render_template('makeadmin.html', entries=entries)
 
+
+@app.route('/initdb')
+def do_init_db():
+    init_db()
+    return redirect('/register')
 
 # </editor-fold>
 
