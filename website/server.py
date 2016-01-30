@@ -4,8 +4,9 @@ from contextlib import closing
 import flask.ext.login as flask_login
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash
 from flask.ext.bcrypt import Bcrypt
+from flask_login import login_user
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, SelectField
+from wtforms import StringField, PasswordField, SelectField, BooleanField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 
 # <editor-fold desc="Config and Init">
@@ -18,10 +19,14 @@ SCHEMA = 'schema.sql'
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-login = flask_login.LoginManager()
-login.init_app(app)
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
 app.config.from_object(__name__)
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 # </editor-fold>
 
@@ -123,29 +128,30 @@ def register_validate(form, field):
 # <editor-fold desc="Form Builders">
 class LoginForm(Form):
     """Creates a login form when called"""
-    username = StringField('username', validators=[DataRequired(message="You forgot to enter a username! You ok?"),
+    username = StringField('Username', validators=[DataRequired(message="You forgot to enter a username! You ok?"),
                                                    login_validate])
-    password = PasswordField('password', validators=[DataRequired(message="You forgot to enter a password! You ok?")])
+    password = PasswordField('Password', validators=[DataRequired(message="You forgot to enter a password! You ok?")])
+    remember = BooleanField('Remember <e')
 
 
 # TODO: ADD RECAPCHA
 class RegisterForm(Form):
-    username = StringField('username', validators=[DataRequired(
+    username = StringField('Username', validators=[DataRequired(
             message='You need a username silly, or you wont be able to login'), register_validate])
-    password = PasswordField('password', validators=[DataRequired(
+    password = PasswordField('Password', validators=[DataRequired(
             message='You need a password silly, or else people can just login as you by knowing your username')])
-    passwordvalidate = PasswordField('repeat password', validators=[DataRequired(
+    passwordvalidate = PasswordField('Repeat Password', validators=[DataRequired(
             message='You need to fill this out! We just need to check that you didn\'t mess up your password'
                     ' by accident.'), EqualTo('password', message='Oh jeez, looks like you mistyped your password.'
                                                                   ' Do me a big favor and type it in to both password'
                                                                   ' boxes again so I don\'t have to reset it for you'
                                                                   ' later.')])
-    email = StringField('email', validators=[DataRequired(message='You need an email so we can contact you and give'
+    email = StringField('Email', validators=[DataRequired(message='You need an email so we can contact you and give'
                                                                   ' you notifications. Don\'t worry, we won\'t spam you'
                                                                   ' or give your email away to anyone'),
                                              Email(message='Whoops, looks like you forgot to put an @ sign or maybe a'
                                                            ' .com? Just check to see if you typed that in right.')])
-    type = SelectField('type', choices=[('admin', 'Admin'), ('user', 'User')])
+    type = SelectField('type', choices=[('admin', 'Admin'), ('student', 'Student'), ('parent', 'Parent')])
 
 
 # </editor-fold>
@@ -160,6 +166,7 @@ def login():
     if request.method == 'POST':
         if form.validate_on_submit():
             flash('User validated with database! Yay!')
+            login_user(form.username.data, remember=form.remember.data)
             return render_template('login.html', form=form)
     return render_template('login.html', form=form)
 
@@ -208,7 +215,7 @@ def listusers():
 @app.route('/initdb')
 def do_init_db():
     init_db()
-    return redirect('/register')
+    return redirect('/listusers')
 
 # </editor-fold>
 
