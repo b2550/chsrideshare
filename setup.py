@@ -1,12 +1,12 @@
-#!/usr/bin/env python
-
-
 from distutils.core import setup
 
-setup(name='CHS Ride Share Platform',
-      version='1.0',
-      description='Ride Share Website Platform',
-      author='Ben Saltz',
-      author_email='bensatlz@gmail.com',
-      packages=['flask', 'flask-login', 'flask-wtf', 'flask-login'],
-      )
+setup(
+    name='squizit-website',
+    version='Alpha',
+    packages=['app'],
+    url='',
+    license='GPL 3.0',
+    author='b2550',
+    author_email='bensaltz@gmail.com',
+    description='Software for the Squizit website'
+)
