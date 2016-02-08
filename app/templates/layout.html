@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<table>
+    <tr>
+        {% for message in get_flashed_messages() %}
+            <td>
+                <span><strong>Take Note: </strong>{{ message }}</span>
+            </td>
+        {% endfor %}
+        <td>
+            {% if g.user.is_authenticated %}
+                <p>Hello, {{ g.user.username }}</p>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+<h1>RideShare Dev</h1>
+{% block body %}{% endblock %}
