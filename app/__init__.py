@@ -1,4 +1,5 @@
 import flask.ext.login as flask_login
+import flask_sijax
 from flask import Flask
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.mail import Mail
@@ -11,5 +12,6 @@ bcrypt = Bcrypt(app)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 mail = Mail(app)
+flask_sijax.Sijax(app)
 
 from app import routes, models

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% block head %}{% endblock %}
 <table>
     <tr>
         {% for message in get_flashed_messages() %}
@@ -8,7 +9,7 @@
         {% endfor %}
         <td>
             {% if g.user.is_authenticated %}
-                <p>Hello, {{ g.user.username }}</p>
+                <p>Hello, {{ g.user.firstname }}</p>
                 <a href="{{ url_for('logout') }}">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}">Login</a>

@@ -3,9 +3,9 @@
     <h2>Register</h2>
     <form method="post" action="{{ url_for('register') }}">
         {{ register_form.csrf_token }}
-        {{ register_form.username.label }} {{ register_form.username(size=20) }}
-        {% if register_form.username.errors %}
-            <ul class="errors">{% for error in register_form.username.errors %}
+        {{ register_form.email.label }} {{ register_form.email(size=20) }}
+        {% if register_form.email.errors %}
+            <ul class="errors">{% for error in register_form.email.errors %}
                 <li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
         {{ register_form.password.label }} {{ register_form.password(size=20) }}
@@ -18,17 +18,23 @@
             <ul class="errors">{% for error in register_form.passwordvalidate.errors %}
                 <li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
-        {{ register_form.email.label }} {{ register_form.email(size=20) }}
-        {% if register_form.email.errors %}
-            <ul class="errors">{% for error in register_form.email.errors %}
+        {{ register_form.firstname.label }} {{ register_form.firstname(size=20) }}
+        {% if register_form.firstname.errors %}
+            <ul class="errors">{% for error in register_form.firstname.errors %}
+                <li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+        {{ register_form.lastname.label }} {{ register_form.lastname(size=20) }}
+        {% if register_form.lastname.errors %}
+            <ul class="errors">{% for error in register_form.lastname.errors %}
                 <li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
         {{ register_form.type.label }} {{ register_form.type }}
-        {{ register_form.recaptcha.label }} {{ register_form.recaptcha }}
-        {% if register_form.recaptcha.errors %}
-            <ul class="errors">{% for error in register_form.recaptcha.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
+        {#  TODO: ADD RECAPCHA BACK  #}
+        {#        {{ register_form.recaptcha.label }} {{ register_form.recaptcha }}#}
+        {#        {% if register_form.recaptcha.errors %}#}
+        {#            <ul class="errors">{% for error in register_form.recaptcha.errors %}#}
+        {#                <li>{{ error }}</li>{% endfor %}</ul>#}
+        {#        {% endif %}#}
         <input type="submit" value="Register">
     </form>
 {% endblock %}

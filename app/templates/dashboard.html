@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% include 'ajax.html' %}
+{% block body %}
+    <h1>Dashboard</h1>
+    {% if address_form %}
+        {% include 'addressform.html' %}
+    {% else %}
+        <p>This is where the dash goes</p>
+    {% endif %}
+
+{% endblock %}
