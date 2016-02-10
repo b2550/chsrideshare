@@ -1,11 +1,11 @@
 import binascii
 
-import flask_sijax
 import os
 from app import app, bcrypt, login_manager, mail
 from flask import request, g, redirect, url_for, render_template, flash
 from flask.ext.mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
+from .apihandler import geocodeing_parser
 from .forms import LoginForm, RegisterForm, ResendVerifyFrom, AddressForm
 from .models import *
 
@@ -33,19 +33,47 @@ def index():
         return render_template('index.html')
 
 
-@flask_sijax.route(app, '/dashboard')
+# @flask_sijax.route(app, '/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     if current_user.address is None:
         form = AddressForm()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                address = form.streetnum.data + " " + form.streetaddress.data + ", " + form.city.data + ", " + form.state.data + ", " + form.country.data
+                user = User.query.filter_by(email=current_user.email).first()
+                user.address = address
+                db.session.add(user)
+                db.session.commit()
+                flash('Address Updated')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('That is not a valid address')
+                flash(form.data)
+                return render_template('dashboard.html', address_form=form)
         return render_template('dashboard.html', address_form=form)
+    elif current_user.latitude or current_user.longitude is None:
+        geocode = geocodeing_parser(current_user.email)
+        if geocode['error'] is None:
+            user = User.query.filter_by(email=current_user.email).first()
+            user.latitude = geocode['latitude']
+            user.longitude = geocode['longitude']
+            user.address = geocode['address']
+            db.session.add(user)
+            db.session.commit()
+            flash('You can now be found by other users')
+            return render_template('dashboard.html')
+        else:
+            # TODO: Update this to real error handler
+            return {
+                'ZERO_RESULTS': 'Your address is not a real location. Please update.',
+                'OVER_QUERY_LIMIT': 'We can\'t proccess your request right now. Try again in a few minutes. If the problem persists, try again tomarrow.',
+                'REQUEST_DENIED': 'Something is wrong on our end so we can\'t proccess your request right now',
+                'INVALID_REQUEST': 'Your address was not saved to our database correctly. Please update it.',
+                'UNKNOWN_ERROR': 'Something is seriously broken so we can\'t proccess your request right now'
+            }[geocode['error']]
     return render_template('dashboard.html')
-
-
-# TODO: Take in value of address and format it for database (try to get this to happen with AJAX)
-@app.route('/setaddress', methods=['GET', 'POST'])
-def address():
-    pass
 
 
 @app.route('/login', methods=['GET', 'POST'])

@@ -45,7 +45,6 @@ class LoginForm(Form):
 
 
 class AddressForm(Form):
-    """Creates a login form when called"""
     streetnum = StringField('Street Number', validators=[DataRequired()])
     streetaddress = StringField('Street Address', validators=[DataRequired()])
     city = StringField('City', validators=[DataRequired()])
