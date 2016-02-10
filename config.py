@@ -6,6 +6,7 @@ if DEBUG:
     from devconfig import *
 else:
     # Copy everything below this comment into devconfig.py
+    # Make sure that you use development keys that are different from your production keys!
     import os
 
     basedir = os.path.abspath(os.path.dirname(__file__))

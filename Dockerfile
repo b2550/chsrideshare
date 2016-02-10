@@ -1,3 +1,4 @@
 FROM python:2-onbuild
-CMD [ "python", "./run.py" ]
+RUN ./db_create.py
+RUN ./db_migrate.py
 CMD [ "python", "./run.py" ]
