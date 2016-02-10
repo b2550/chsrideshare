@@ -5,6 +5,8 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.mail import Mail
 from flask.ext.sqlalchemy import SQLAlchemy
 
+# TODO: Add print() debug
+
 app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
