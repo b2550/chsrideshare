@@ -1,30 +1,35 @@
-import os
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-
+# TODO: Add comments to this
 DEBUG = True
-# TODO: Remember to change this!
-SECRET_KEY = 'SQIZ9zxyckj4h-9=ssdu&s!y42s7%bv#k+d(!n8u(s&1ifi)fo2degIT'
 
-GOOGLE_API_KEY = 'AIzaSyAvyesykC2fa_XKQU8ORWgHKk1JqYYxeJA'
+# When debug is enabled, the project will use the devconfig.py file instead (which you need to create)
+if DEBUG:
+    from devconfig import *
+else:
+    # Copy everything below this comment into devconfig.py
+    import os
 
-RECAPTCHA_USE_SSL = False
-RECAPTCHA_PUBLIC_KEY = '6Ldz2hYTAAAAAG4yR3cABwtC-qo8SO5pWcgVA_i5'
-RECAPTCHA_PRIVATE_KEY = '6Ldz2hYTAAAAAFGU5JEz_sxrWCmlq7S_TzytdJ-8'
-RECAPTCHA_PARAMETERS = {}
-RECAPTCHA_DATA_ATTRS = {'theme': 'dark'}
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    SECRET_KEY = 'Add Key'
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
-SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
-SQLALCHEMY_TRACK_MODIFICATIONS = True
+    GOOGLE_API_KEY = 'Add Key'
 
-MAIL_SERVER = 'server.holeinthewallhosting.net'
-MAIL_PORT = 465
-MAIL_USE_TLS = False
-MAIL_USE_SSL = True
-MAIL_USERNAME = 'test@nbn64.com'
-MAIL_PASSWORD = '&vNIYMyNUrH+'
+    RECAPTCHA_USE_SSL = False
+    RECAPTCHA_PUBLIC_KEY = 'Add Key'
+    RECAPTCHA_PRIVATE_KEY = 'Add Key'
+    RECAPTCHA_PARAMETERS = {}
+    RECAPTCHA_DATA_ATTRS = {'theme': 'dark'}
 
-sijaxpath = os.path.join('.', os.path.dirname(__file__), 'static/js/sijax/')
-SIJAX_STATIC_PATH = sijaxpath
-SIJAX_JSON_URI = sijaxpath + "json2.js"
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+    MAIL_SERVER = 'example.com'
+    MAIL_PORT = 465
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = 'test@example.com'
+    MAIL_PASSWORD = 'password'
+
+    sijaxpath = os.path.join('.', os.path.dirname(__file__), 'static/js/sijax/')
+    SIJAX_STATIC_PATH = sijaxpath
+    SIJAX_JSON_URI = sijaxpath + "json2.js"
