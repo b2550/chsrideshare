@@ -1,8 +1,9 @@
 # TODO: Add comments to this
 DEBUG = True
+USE_DEVCONFIG = False
 
 # When debug is enabled, the project will use the devconfig.py file instead (which you need to create)
-if DEBUG:
+if DEBUG and USE_DEVCONFIG:
     from devconfig import *
 else:
     # Copy everything below this comment into devconfig.py
