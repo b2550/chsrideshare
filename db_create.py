@@ -1,4 +1,3 @@
-#!chsrideshare/bin/python
 import os.path
 from app import db
 from config import SQLALCHEMY_DATABASE_URI
