@@ -1,6 +1,4 @@
-FROM python:3-alpine
-
-RUN pip install --upgrade pip
+FROM python:alpine
 
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
@@ -15,4 +13,4 @@ ENV APP_MAIL_PASSWORD=None
 
 EXPOSE 8001
 
-CMD [ "python", "./run.py" ]
+CMD [ "python3", "./run.py" ]
