@@ -1,8 +1,5 @@
 FROM python:3.5.1-alpine
 
-COPY ./requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
 ENV APP_SECRET_KEY=None
