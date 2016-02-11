@@ -8,7 +8,15 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # TODO: Add print() debug
 
 app = Flask(__name__)
-app.config.from_object('config')
+try:
+    app.config.from_object('config')
+except:
+    app.config.from_object('config_fallback')
+    app.logger.critical('!!!   APP NOT CONFIGURED  !!!')
+    app.logger.critical('!!! USING FALLBACK CONFIG !!!')
+    app.logger.critical('!!!   ERRORS WILL OCCUR   !!!')
+    # app.logger.error('!!!        CRASHING       !!!')
+    # raise KeyError('Configuration did not detect environment ')
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = flask_login.LoginManager()
