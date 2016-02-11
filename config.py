@@ -3,8 +3,6 @@ import os
 DEBUG = os.environ('APP_DEBUG')
 TESTING = os.environ('APP_TESTING')
 
-BADCONFIG = os.environ('APP_BADCONFIG')
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 SECRET_KEY = os.environ('APP_SECRET_KEY')
 

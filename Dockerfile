@@ -11,4 +11,8 @@ ENV APP_MAIL_PORT=None
 ENV APP_MAIL_USERNAME=None
 ENV APP_MAIL_PASSWORD=None
 
+EXPOSE 8001
+
+CMD [ "python", "./run.py" ]
+
 # TODO: Switch some config to environment variables
