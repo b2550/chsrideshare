@@ -1,5 +1,7 @@
 FROM python:3.5.1-alpine
 
+RUN apk add
+
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
 ENV APP_SECRET_KEY=None
@@ -14,5 +16,3 @@ ENV APP_MAIL_PASSWORD=None
 EXPOSE 8001
 
 CMD [ "python", "./run.py" ]
-
-# TODO: Switch some config to environment variables
