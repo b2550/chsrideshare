@@ -1,4 +1,8 @@
-FROM python:alpine
+FROM alpine:3.1
+
+RUN apk add --update python py-pip
+
+RUN pip install -r requirements.txt
 
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
