@@ -17,4 +17,4 @@ ENV APP_MAIL_PASSWORD=None
 
 EXPOSE 8001
 
-CMD [ "python3", "./run.py" ]
+CMD [ "python", "./run.py" ]
