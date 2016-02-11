@@ -1,5 +1,7 @@
 FROM python:3-alpine
 
+RUN pip install --upgrade pip
+
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
 ENV APP_SECRET_KEY=None
