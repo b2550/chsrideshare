@@ -6,4 +6,3 @@ Flask-Sijax==0.4.1
 Flask-SQLAlchemy==2.1
 Flask-WTF==0.12
 sqlalchemy-migrate==0.10.0
-ndg-httpsclient==0.4.0
