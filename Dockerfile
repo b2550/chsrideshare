@@ -1,6 +1,4 @@
-FROM python:3.5.1-alpine
-
-RUN apk add
+FROM python:3-alpine
 
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
