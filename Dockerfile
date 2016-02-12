@@ -1,5 +1,7 @@
 FROM python:alpine
 
+RUN apk add --update python py-pip
+
 COPY ./ /
 
 RUN pip install -r /requirements.txt
