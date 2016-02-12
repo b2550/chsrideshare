@@ -1,6 +1,6 @@
 FROM python:alpine
 
-RUN pip install -r ./requirements.txt
+RUN pip install -r requirements.txt
 
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
