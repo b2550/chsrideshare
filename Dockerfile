@@ -1,6 +1,8 @@
 FROM python:alpine
 
-RUN pip install -r requirements.txt
+COPY ./ /
+
+RUN pip install -r /requirements.txt
 
 ENV APP_DEBUG=False
 ENV APP_TESTING=False
@@ -15,4 +17,4 @@ ENV APP_MAIL_PASSWORD=None
 
 EXPOSE 8001
 
-CMD [ "python", "./run.py" ]
+CMD [ "python", "/run.py" ]
