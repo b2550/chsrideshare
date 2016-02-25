@@ -16,8 +16,8 @@ class Users(db.Model):
     uid = db.Column(db.Text(64), unique=True)
     requests = db.relationship('Requests', backref='receiver', foreign_keys='Requests.user_destination')
     sentrequests = db.relationship('Requests', backref='sender', foreign_keys='Requests.user_origin')
-
-    # group_id = db.Column(db.Integer)
+    notifications = db.relationship('Notifications', backref='user')
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
 
     def __init__(self, email, password, firstname, lastname, utype, uid, active=True):
         self.password = password
@@ -68,13 +68,15 @@ class Requests(db.Model):
 class Groups(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer, primary_key=True)
-    distance_matrix = db.Column(db.Text)
-
-    # users = db.relationship('Users', backref='users')
+    users = db.relationship('Users', backref='group')
+    primary_user = db.Column(db.Integer)
     # routes = db.relationship('Routes', backref='getroutes')
 
+    def __init__(self, primary_user):
+        self.primary_user = primary_user
+
     def __repr__(self):
-        return '<Groups %r>' % self.user_list
+        return '<Groups %r>' % self.id
 
 
 class Routes(db.Model):
@@ -86,3 +88,17 @@ class Routes(db.Model):
 
     def __repr__(self):
         return '<Routes %r>' % self.id
+
+
+class Notifications(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    message = db.Column(db.Text)
+
+    def __init__(self, user_id, message):
+        self.user_id = user_id
+        self.message = message
+
+    def __repr__(self):
+        return '<Notifications %r>' % self.id

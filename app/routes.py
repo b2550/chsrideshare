@@ -100,6 +100,27 @@ def dashboard():
                 db.session.add(req)
                 db.session.commit()
                 flash('Request Accepted')
+                if current_user.group_id is None and req.sender.group_id is None:
+                    group = Groups(req.sender.id)
+                    db.session.add(group)
+                    db.session.commit()
+                    groups = Groups.query.filter_by(primary_user=req.sender.id).first()
+                    user1 = Users.query.filter_by(id=current_user.id).first()
+                    user2 = Users.query.filter_by(id=req.sender.id).first()
+                    user1.group_id = groups.id
+                    user2.group_id = groups.id
+                    flash('A group has been created for you and ' + req.sender.firstname)
+                    notification = Notifications(req.sender.id,
+                                                 current_user.firstname + ' has accepted your request, and a group has been created for you')
+                    db.session.add_all([user1, user2, notification])
+                    db.session.commit()
+
+                if current_user.group_id is not None and req.sender.group_id is None:
+                    print 'add the requester to the group'
+                if current_user.group_id is not None and req.sender.group_id is not None:
+                    print 'one user will have to leave their current group'
+
+                # TODO: Add text to notify receiver if user is joining their group, if they are joining a group, or if they will have to leave their current group
                 # TODO: Call group manager handler (deletes request when complete)
                 # TODO: Notify origin user that request was accepted via email and notification (create notifications table)
                 return redirect(url_for('dashboard'))

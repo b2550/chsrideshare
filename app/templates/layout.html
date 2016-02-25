@@ -4,9 +4,14 @@
     <tr>
         {% for message in get_flashed_messages() %}
             <td>
-                <span><strong>Take Note: </strong>{{ message }}</span>
+                <span><b>Take Note: </b>{{ message }}</span>
             </td>
         {% endfor %}
+
+        {% for notification in g.user.notifications %}
+            <td><b>Notification: </b>{{ notification.message }}</td>
+        {% endfor %}
+
         <td>
             {% if g.user.is_authenticated %}
                 <p>Hello, {{ g.user.firstname }}</p>
