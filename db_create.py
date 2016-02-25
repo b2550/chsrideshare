@@ -1,8 +1,9 @@
 import os.path
-from app import db
-from config import SQLALCHEMY_DATABASE_URI
-from config import SQLALCHEMY_MIGRATE_REPO
+from app import db, app
 from migrate.versioning import api
+
+SQLALCHEMY_DATABASE_URI = app.config.get('SQLALCHEMY_DATABASE_URI')
+SQLALCHEMY_MIGRATE_REPO = app.config.get('SQLALCHEMY_MIGRATE_REPO')
 
 if not os.path.exists(SQLALCHEMY_DATABASE_URI):
     db.create_all()

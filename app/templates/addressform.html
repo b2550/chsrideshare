@@ -6,27 +6,12 @@
 
     <form method="post" action="{{ url_for('dashboard') }}">
         {{ address_form.csrf_token }}
-        <table id="address">
-            <tr>
-                <td class="label">{{ address_form.streetaddress.label }}</td>
-                <td class="slimField">{{ address_form.streetnum(id='street_number', hidden=True) }}</td>
-                <td class="wideField" colspan="2">{{ address_form.streetaddress(id='route', hidden=True) }}</td>
-            </tr>
-            <tr>
-                <td class="label">City</td>
-                <td class="wideField" colspan="3">{{ address_form.city(id='locality', hidden=True) }}</td>
-            </tr>
-            <tr>
-                <td class="label">State</td>
-                <td class="slimField">{{ address_form.state(id='administrative_area_level_1', hidden=True) }}</td>
-                <td class="label">Zip code</td>
-                <td class="wideField">{{ address_form.zip(id='postal_code', hidden=True) }}</td>
-            </tr>
-            <tr>
-                <td class="label">Country</td>
-                <td class="wideField" colspan="3">{{ address_form.country(id='country', hidden=True) }}</td>
-            </tr>
-        </table>
+        {{ address_form.streetnum(id='street_number') }}
+        {{ address_form.streetaddress(id='route') }}
+        {{ address_form.city(id='locality') }}
+        {{ address_form.state(id='administrative_area_level_1') }}
+        {{ address_form.zip(id='postal_code') }}
+        {{ address_form.country(id='country') }}
         <input type="submit" value="Set Address">
     </form>
 

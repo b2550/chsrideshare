@@ -5,10 +5,14 @@ from flask.ext.bcrypt import Bcrypt
 from flask.ext.mail import Mail
 from flask.ext.sqlalchemy import SQLAlchemy
 
-# TODO: Add print() debug
 
 app = Flask(__name__)
-app.config.from_object('config')
+try:
+    app.config.from_object('config')
+except AttributeError:
+    app.logger.warning(
+        'Enviroment config failed, trying \'noconfig.py\' file. If this fails then the fallback config does not exist.')
+    app.config.from_object('noconfig')
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = flask_login.LoginManager()

@@ -1,7 +1,8 @@
 from app import bcrypt
-from flask import url_for, Markup
+from flask import url_for, Markup, flash
+from flask.ext.login import current_user
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, SelectField, BooleanField
+from wtforms import StringField, PasswordField, SelectField, BooleanField, HiddenField, DecimalField, TextAreaField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from .models import *
 
@@ -9,7 +10,7 @@ from .models import *
 def login_validate(form, field):
     """Validates the login form"""
     fpass = form["password"]
-    dbuser = User.query.filter_by(email=field.data).first()
+    dbuser = Users.query.filter_by(email=field.data).first()
     if dbuser is None:
         raise ValidationError("Check that you entered everything correctly")
     elif not bcrypt.check_password_hash(dbuser.password, fpass.data):
@@ -21,14 +22,14 @@ def login_validate(form, field):
 
 def register_validate(form, field):
     """Validates the register form"""
-    dbuser = User.query.filter_by(email=field.data).first()
+    dbuser = Users.query.filter_by(email=field.data).first()
     if dbuser is not None:
         raise ValidationError("Email already in use. If you forget your password you can reset that from"
                               " the login page.")
 
 
 def resendvalidation_validate(form, field):
-    email = User.query.filter_by(email=field.data).first()
+    email = Users.query.filter_by(email=field.data).first()
     if email is None:
         raise ValidationError('Could not find that email on our servers. Make sure you typed the email you used'
                               ' to register.')
@@ -45,12 +46,12 @@ class LoginForm(Form):
 
 
 class AddressForm(Form):
-    streetnum = StringField('Street Number', validators=[DataRequired()])
-    streetaddress = StringField('Street Address', validators=[DataRequired()])
-    city = StringField('City', validators=[DataRequired()])
-    state = StringField('State', validators=[DataRequired()])
-    zip = StringField('Zip Code', validators=[DataRequired()])
-    country = StringField('Country', validators=[DataRequired()])
+    streetnum = HiddenField('Street Number', validators=[DataRequired()])
+    streetaddress = HiddenField('Street Address', validators=[DataRequired()])
+    city = HiddenField('City', validators=[DataRequired()])
+    state = HiddenField('State', validators=[DataRequired()])
+    zip = HiddenField('Zip Code', validators=[DataRequired()])
+    country = HiddenField('Country', validators=[DataRequired()])
 
 
 # TODO: ADD RECAPCHA BACK
@@ -87,3 +88,41 @@ class ResendVerifyFrom(Form):
                                              resendvalidation_validate])
     # recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
     #                                                         'may have made an error... try again please.')])
+
+
+def RequestFormValidateOrigin(form, field):
+    requests = Users.query.join(Requests, Requests.user_destination == Users.id).filter(
+        Requests.user_destination == current_user.id).all()
+    sent = Users.query.join(Requests, Requests.user_origin == Users.id).filter(Requests.user_origin == current_user.id,
+                                                                               Requests.accepted < 1).all()
+    for req in sent:
+        if req.receiver.id == field.data:
+            flash('You already sent a request to this user')
+            raise ValidationError('You already sent a request to this user')
+    for req in requests:
+        if req.sender.id == field.data:
+            flash('This user already sent a request to you')
+            raise ValidationError('This user already sent a request to you')
+
+
+class RequestForm(Form):
+    user_destination = HiddenField('User ID', validators=[DataRequired(message='Error: user may not exist.'),
+                                                          RequestFormValidateOrigin])
+    message = TextAreaField('Message')
+
+
+# TODO: Integrate cancel and deny features
+class CancelRequestForm(Form):
+    pass
+
+
+class DenyRequestForm(Form):
+    pass
+
+
+class AcceptForm(Form):
+    user_origin = HiddenField('Origin User ID', validators=[DataRequired(message='Error: user may not exist')])
+
+
+class RangeForm(Form):
+    range = DecimalField('Search Radius (Miles)', places=2)

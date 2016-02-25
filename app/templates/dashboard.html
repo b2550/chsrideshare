@@ -4,8 +4,50 @@
     <h1>Dashboard</h1>
     {% if address_form %}
         {% include 'addressform.html' %}
-    {% else %}
-        <p>This is where the dash goes</p>
+    {% endif %}
+
+    <h2>Carpool Candidates</h2>
+    {% if range_form %}
+        <form method="post" action="{{ url_for('dashboard') }}">
+            {{ range_form.csrf_token }}
+            {{ range_form.range.label }} {{ range_form.range(value=query_range) }}
+            <input type="submit" value="Set Range">
+        </form>
+    {% endif %}
+
+    {% if sent %}
+        <h2>Awaiting Response</h2>
+        {% for req in sent[0].sentrequests %}
+            <p>{{ req.receiver.firstname }} {{ req.receiver.lastname }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if canidates %}
+        {% for canidate in canidates if canidate.email != g.user.email %}
+            <form method="post" action="{{ url_for('dashboard') }}">
+                {{ request_form.csrf_token }}
+                <p>{{ canidate.firstname }} {{ canidate.lastname }}</p>
+                {{ request_form.message.label }} {{ request_form.message }}
+                {{ request_form.user_destination(value=canidate.id) }}
+                <input type="submit" value="Request Information">
+            </form>
+            <p>---</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if requests %}
+        <h2>Carpool Requests</h2>
+        {% for req in requests[0].requests %}
+            <p>{{ req.sender.firstname }} {{ req.sender.lastname }}</p>
+            {% if req.message %}
+                <p>{{ req.message }}</p>
+            {% endif %}
+            <form method="post" action="{{ url_for('dashboard') }}">
+                {{ accept_form.csrf_token }}
+                {{ request_form.user_destination(value=req.sender.id) }}
+                <input type="submit" value="Exchange Information">
+            </form>
+        {% endfor %}
     {% endif %}
 
 {% endblock %}
