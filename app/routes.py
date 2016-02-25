@@ -81,7 +81,7 @@ def dashboard():
 
         canidates = []
         requests = Users.query.join(Requests, Requests.user_destination == Users.id).filter(
-            Requests.user_destination == current_user.id).all()
+            Requests.user_destination == current_user.id, Requests.accepted < 1).all()
         sent = Users.query.join(Requests, Requests.user_origin == Users.id).filter(
             Requests.user_origin == current_user.id, Requests.accepted < 1).all()
         users = Users.query.all()
@@ -94,10 +94,15 @@ def dashboard():
                 flash('Request Sent')
                 return redirect(url_for('dashboard'))
             if accept_form.validate_on_submit():
-                for req in requests:
-                    if req.sender.id == accept_form.user_origin.data and req.receiver.id == current_user.id:
-                        flash('You it work so you can add this functionality now')
-                        return redirect(url_for('dashboard'))
+                req = Requests.query.filter_by(user_origin=int(accept_form.user_origin.data),
+                                               user_destination=current_user.id).first()
+                req.accepted = 1
+                db.session.add(req)
+                db.session.commit()
+                flash('Request Accepted')
+                # TODO: Call group manager handler (deletes request when complete)
+                # TODO: Notify origin user that request was accepted via email and notification (create notifications table)
+                return redirect(url_for('dashboard'))
             if range_form.validate_on_submit():
                 query_range = range_form.range.data
 
@@ -106,10 +111,9 @@ def dashboard():
                     math.radians(user.latitude)) * math.cos(
                         math.radians(user.longitude) - math.radians(float(current_user.longitude))) + math.sin(
                     math.radians(float(current_user.latitude))) * math.sin(math.radians(user.latitude)))) < query_range:
-                if user.requests:
+                if user.requests or user.sentrequests:
                     for req in user.requests:
-                        if req.receiver.id != current_user.id and canidates.count(
-                                user) < 1 and req.receiver.id != user.id:
+                        if req.sender.id != current_user.id and canidates.count(user) < 1:
                             canidates.append(user)
                 else:
                     canidates.append(user)

@@ -44,7 +44,7 @@
             {% endif %}
             <form method="post" action="{{ url_for('dashboard') }}">
                 {{ accept_form.csrf_token }}
-                {{ request_form.user_destination(value=req.sender.id) }}
+                {{ accept_form.user_origin(value=req.sender.id) }}
                 <input type="submit" value="Exchange Information">
             </form>
         {% endfor %}

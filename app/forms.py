@@ -120,8 +120,19 @@ class DenyRequestForm(Form):
     pass
 
 
+def AcceptFormValidate(form, field):
+    requests = Users.query.join(Requests, Requests.user_destination == Users.id).filter(
+        Requests.user_destination == current_user.id).all()
+    for r in requests:
+        for req in r.requests:
+            if req.sender.id != int(field.data) and req.receiver.id != current_user.id:
+                flash('You are not logged in as the right user or that user did not send you a request')
+                raise ValidationError('You are not logged in as the right user or that user did not send you a request')
+
+
 class AcceptForm(Form):
-    user_origin = HiddenField('Origin User ID', validators=[DataRequired(message='Error: user may not exist')])
+    user_origin = HiddenField('Origin User ID',
+                              validators=[DataRequired(message='Error: user may not exist'), AcceptFormValidate])
 
 
 class RangeForm(Form):
