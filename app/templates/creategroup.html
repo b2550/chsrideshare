@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <h1>Create Group</h1>
+    <form method="post" action="{{ url_for('create_group') }}">
+        {{ form.csrf_token }}
+        {{ form.name.label }} {{ form.name }}
+        {% if form.name.errors %}
+            <ul class="errors">
+                {% for error in form.name.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <input type="submit" value="Create Group">
+    </form>
+{% endblock %}

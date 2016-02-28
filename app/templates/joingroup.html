@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <h1>Join Group</h1>
+    <form method="post" action="{{ url_for('join_group') }}">
+        {{ form.csrf_token }}
+        {{ form.join_id.label }} {{ form.join_id(size=6) }}
+        {% if form.join_id.errors %}
+            <ul class="errors">
+                {% for error in form.join_id.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <input type="submit" value="Join Group">
+    </form>
+{% endblock %}

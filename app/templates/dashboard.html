@@ -5,6 +5,15 @@
         {% include 'addressform.html' %}
     {% endif %}
 
+    {% if groups %}
+        <h2>Your groups</h2>
+        <ul>
+            {% for group in groups %}
+                <li><a href="{{ url_for('') }}">{{ group.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <h2>Carpool Candidates</h2>
     {% if range_form %}
         <form method="post" action="{{ url_for('dashboard') }}">
@@ -27,6 +36,7 @@
                 {{ request_form.csrf_token }}
                 <p>{{ canidate.firstname }} {{ canidate.lastname }}</p>
                 {{ request_form.message.label }} {{ request_form.message }}
+                {{ request_form.group_id.label }} {{ request_form.group_id }}
                 {{ request_form.user_destination(value=canidate.id) }}
                 <input type="submit" value="Request Information">
             </form>

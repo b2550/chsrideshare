@@ -1,5 +1,10 @@
 from app import db
 
+grouprel = db.Table('grouprel',
+                    db.Column('user', db.Integer, db.ForeignKey('users.id')),
+                    db.Column('group', db.Integer, db.ForeignKey('groups.id'))
+                    )
+
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -17,7 +22,7 @@ class Users(db.Model):
     requests = db.relationship('Requests', backref='receiver', foreign_keys='Requests.user_destination')
     sentrequests = db.relationship('Requests', backref='sender', foreign_keys='Requests.user_origin')
     notifications = db.relationship('Notifications', backref='user')
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
+    groups = db.relationship('Groups', secondary=grouprel, lazy='dynamic', backref=db.backref('users', lazy='dynamic'))
 
     def __init__(self, email, password, firstname, lastname, utype, uid, active=True):
         self.password = password
@@ -68,12 +73,14 @@ class Requests(db.Model):
 class Groups(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer, primary_key=True)
-    users = db.relationship('Users', backref='group')
-    primary_user = db.Column(db.Integer)
-    # routes = db.relationship('Routes', backref='getroutes')
+    name = db.Column(db.String)
+    join_id = db.Column(db.Text, unique=True)
 
-    def __init__(self, primary_user):
-        self.primary_user = primary_user
+    def __init__(self, name, join_id):
+        self.name = name
+        self.join_id = join_id
+
+    # routes = db.relationship('Routes', backref='getroutes')
 
     def __repr__(self):
         return '<Groups %r>' % self.id
