@@ -8,12 +8,11 @@
             <ul class="errors">{% for error in verify_form.email.errors %}
                 <li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
-        {#  TODO: ADD RECAPCHA BACK  #}
-        {#        {{ verify_form.recaptcha.label }} {{ verify_form.recaptcha }}#}
-        {#        {% if verify_form.recaptcha.errors %}#}
-        {#            <ul class="errors">{% for error in verify_form.recaptcha.errors %}#}
-        {#                <li>{{ error }}</li>{% endfor %}</ul>#}
-        {#        {% endif %}#}
+        {{ verify_form.recaptcha.label }} {{ verify_form.recaptcha }}
+        {% if verify_form.recaptcha.errors %}
+            <ul class="errors">{% for error in verify_form.recaptcha.errors %}
+                <li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
         <input type="submit" value="Resend Email">
     </form>
 {% endblock %}

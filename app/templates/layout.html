@@ -9,7 +9,15 @@
         {% endfor %}
 
         {% for notification in g.user.notifications %}
-            <td><b>Notification: </b>{{ notification.message }}</td>
+            <td>
+                <b>Notification: </b>
+                {{ notification.message }}
+                <form method="post" action="">
+                    {{ g.rmnote.csrf_token }}
+                    {{ g.rmnote.id(value=notification.id) }}
+                    <input type="submit" value="x">
+                </form>
+            </td>
         {% endfor %}
 
         <td>

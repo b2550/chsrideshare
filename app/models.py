@@ -1,6 +1,7 @@
 from app import db
 
 grouprel = db.Table('grouprel',
+                    db.Column('id', db.Integer, primary_key=True),
                     db.Column('user', db.Integer, db.ForeignKey('users.id')),
                     db.Column('group', db.Integer, db.ForeignKey('groups.id'))
                     )
@@ -49,7 +50,7 @@ class Users(db.Model):
         return unicode(self.id)
 
     def __repr__(self):
-        return '<Users %r>' % self.email
+        return '<User %r>' % self.email
 
 
 class Requests(db.Model):
@@ -57,17 +58,19 @@ class Requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_origin = db.Column(db.Integer, db.ForeignKey('users.id'))
     user_destination = db.Column(db.Integer, db.ForeignKey('users.id'))
+    group_id = db.Column(db.Integer)
     message = db.Column(db.Unicode)
-    accepted = db.Column(db.Integer)
+    accepted = db.Column(db.Integer)  # 0 means pending, 1 means accepted, 2 means rejected
 
-    def __init__(self, user_origin, user_destination, message, accepted=0):
+    def __init__(self, user_origin, user_destination, group_id, message, accepted=0):
         self.user_origin = user_origin
         self.user_destination = user_destination
         self.message = message
         self.accepted = accepted
+        self.group_id = group_id
 
     def __repr__(self):
-        return '<Requests %r>' % self.id
+        return '<Request %r>' % "from " + self.user_origin + " to " + self.user_destination + " into group " + self.group_id
 
 
 class Groups(db.Model):
@@ -80,21 +83,8 @@ class Groups(db.Model):
         self.name = name
         self.join_id = join_id
 
-    # routes = db.relationship('Routes', backref='getroutes')
-
     def __repr__(self):
-        return '<Groups %r>' % self.id
-
-
-class Routes(db.Model):
-    __tablename__ = 'routes'
-    id = db.Column(db.Integer, primary_key=True)
-    route = db.Column(db.Text)
-
-    # group = db.Column(db.Integer, db.ForeignKey('groups.id'))
-
-    def __repr__(self):
-        return '<Routes %r>' % self.id
+        return '<Group %r>' % self.id + " - " + self.name
 
 
 class Notifications(db.Model):
@@ -108,4 +98,4 @@ class Notifications(db.Model):
         self.message = message
 
     def __repr__(self):
-        return '<Notifications %r>' % self.id
+        return '<Notification %r>' % self.id + " - " + self.user_id

@@ -1,7 +1,7 @@
 from app import bcrypt
 from flask import url_for, Markup, flash
 from flask.ext.login import current_user
-from flask_wtf import Form
+from flask_wtf import Form, RecaptchaField, Recaptcha
 from wtforms import StringField, PasswordField, SelectField, BooleanField, HiddenField, DecimalField, TextAreaField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 from .models import *
@@ -55,12 +55,17 @@ def request_form_validate(form, field):
         Requests.user_destination == current_user.id).all()
     sent = Users.query.join(Requests, Requests.user_origin == Users.id).filter(Requests.user_origin == current_user.id,
                                                                                Requests.accepted < 1).all()
+    group = Groups.query.filter_by(id=form['group_id'].data).first()
+
+    if group is None:
+        raise ValidationError('This group does not exist')
+
     for req in sent:
-        if req.receiver.id == field.data:
+        if req.receiver.id == field.data and req.group_id == form['group_id'].data:
             flash('You already sent a request to this user')
             raise ValidationError('You already sent a request to this user')
     for req in requests:
-        if req.sender.id == field.data:
+        if req.sender.id == field.data and req.group_id == form['group_id'].data:
             flash('This user already sent a request to you')
             raise ValidationError('This user already sent a request to you')
 
@@ -71,14 +76,23 @@ def accept_form_validate(form, field):
         Requests.user_destination == current_user.id).all()
     for r in requests:
         for req in r.requests:
-            if req.sender.id != int(field.data) and req.receiver.id != current_user.id:
-                flash('You are not logged in as the right user or that user did not send you a request')
+            if req.sender.id != int(field.data) and req.receiver.id != current_user.id and req.group_id != form[
+                'group_id'].data:
                 raise ValidationError('You are not logged in as the right user or that user did not send you a request')
 
 
 def join_form_validate(form, field):
-    if Groups.query.filter_by(join_id=field.data) is None:
+    if Groups.query.filter_by(join_id=field.data).first() is None:
         raise ValidationError('You must have entered the code wrong. Try again please.')
+    for group in current_user.groups:
+        if group.join_id == field.data:
+            raise ValidationError('You are already a member of this group')
+
+
+def notification_form_validate(form, field):
+    notifications = Notifications.query.filter_by(user_id=current_user.id).all()
+    if not notifications.contains(field.data):
+        raise ValidationError('Not your notification')
 
 
 # endregion
@@ -104,7 +118,6 @@ class LoginForm(Form):
     remember = BooleanField('Remember Me')
 
 
-# TODO: ADD RECAPCHA BACK
 class RegisterForm(Form):
     """Creates a user registration form when called"""
     email = StringField('Email', validators=[DataRequired(message='You need an email so we can log you in, contact you,'
@@ -126,20 +139,19 @@ class RegisterForm(Form):
                                                               ' Do me a big favor and type it in to both password'
                                                               ' boxes again so I don\'t have to reset it for you'
                                                               ' later.')])
-    type = SelectField('type', choices=[('admin', 'Admin'), ('student', 'Student'), ('parent', 'Parent')])
-    # recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
-    #                                                         'may have made an error... try again please.')])
+    type = SelectField('What are you?', choices=[('student', 'Student'), ('parent', 'Parent')])
+    recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
+                                                             'may have made an error... try again please.')])
 
 
-# TODO: ADD RECAPCHA BACK
 class ResendVerifyFrom(Form):
     """Creates a form to resend the user verification email when called"""
     email = StringField('Email', validators=[DataRequired(message='You gotta enter an email!'),
                                              Email(message='Whoops, looks like you forgot to put an @ sign or maybe a'
                                                            ' .com? Just check to see if you typed that in right.'),
                                              resend_verify_validate])
-    # recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
-    #                                                         'may have made an error... try again please.')])
+    recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
+                                                             'may have made an error... try again please.')])
 
 
 # endregion
@@ -154,12 +166,13 @@ class RequestForm(Form):
     group_id = SelectField('Group', coerce=int)
 
 
-# TODO: Integrate cancel and deny features
+# TODO: Integrate cancel request feature
 class CancelRequestForm(Form):
     """Creates a cancel request form when called"""
     pass
 
 
+# TODO: Integrate deny request feature
 class DenyRequestForm(Form):
     """Creates a deny request form when called"""
     pass
@@ -169,6 +182,36 @@ class AcceptForm(Form):
     """Creates an accept request form when called"""
     user_origin = HiddenField('Origin User ID',
                               validators=[DataRequired(message='Error: user may not exist'), accept_form_validate])
+    group_id = HiddenField('Group ID', validators=[DataRequired(message='Group does not exist')])
+
+
+# endregion
+
+
+# region Group System
+class CreateGroupForm(Form):
+    name = StringField('Group Name', validators=[DataRequired(message='You must enter a group name')])
+
+
+class JoinGroupForm(Form):
+    join_id = StringField('Group Code',
+                          validators=[DataRequired(message='You must enter a 6 digit group code'), join_form_validate])
+
+
+# TODO: Integrate leave group feature
+class LeaveGroupForm(Form):
+    # Can't leave group as group manager
+    pass
+
+
+# TODO: Integrate remove user from group feature (set 1 user as group admin)
+class RemoveFromGroupForm(Form):
+    pass
+
+
+# TODO: Integrate delete group feature (can only be done by group admin)
+class DeleteGroupForm(Form):
+    pass
 
 
 # endregion
@@ -189,19 +232,5 @@ class RangeForm(Form):
     range = DecimalField('Search Radius (Miles)', places=2, validators=[DataRequired()])
 
 
-class CreateGroupForm(Form):
-    name = StringField('Group Name', validators=[DataRequired(message='You must enter a group name')])
-
-
-class JoinGroupForm(Form):
-    join_id = StringField('Group Code',
-                          validators=[DataRequired(message='You must enter a 6 digit group code'), join_form_validate])
-
-
-class LeaveGroupForm(Form):
-    # Can't leave group as group manager
-    pass
-
-
-class RemoveFromGroup(Form):
-    pass
+class DismissNotificationForm(Form):
+    id = HiddenField('Notification ID', validators=[DataRequired('Notification doesn\'t exist')])

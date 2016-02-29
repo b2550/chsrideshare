@@ -10,14 +10,28 @@ from flask.ext.mail import Message
 from flask_login import login_user, logout_user, login_required, current_user
 from .apihandler import geocodeing_parser
 from .forms import LoginForm, RegisterForm, ResendVerifyFrom, AddressForm, RequestForm, AcceptForm, RangeForm, \
-    CreateGroupForm, JoinGroupForm
+    CreateGroupForm, JoinGroupForm, DismissNotificationForm
 from .models import *
+
+DEBUG = app.config.get('DEBUG')
 
 
 # region Handlers
 @app.before_request
 def get_login_status():
     g.user = current_user
+
+
+@app.before_request
+def universal_data():
+    if current_user.is_authenticated:
+        g.rmnote = DismissNotificationForm()
+        if request.method == 'POST':
+            if g.rmnote.validate_on_submit():
+                note = Notifications.query.filter_by(user_id=current_user.id, id=g.rmnote.id.data).first()
+                db.session.delete(note)
+                db.session.commit()
+
 
 
 @login_manager.user_loader
@@ -80,7 +94,6 @@ def dashboard():
                   }[geocode['error']])
             return redirect(url_for('dashboard'))
     else:
-        # TODO: Check if user is already in group to prevent problems
         request_form = RequestForm()
         accept_form = AcceptForm()
         range_form = RangeForm()
@@ -100,29 +113,47 @@ def dashboard():
         users = Users.query.all()
         groups = current_user.groups
 
+        # Forms
         if request.method == 'POST':
+            # Request Form
             if request_form.validate_on_submit():
+                # Create group
                 if request_form.group_id.data is 0:
                     return redirect(url_for('create_group', user_destination=request_form.user_destination.data,
                                             message=request_form.message.data))
+                # Add user to group
                 else:
-                    # group
-                    pass
+                    req = Requests(current_user.id, request_form.user_destination.data, request_form.group_id.data,
+                                   request_form.message.data)
+                    db.session.add(req)
+                    db.session.commit()
+                    flash('Request sent')
+                    return redirect(url_for('dashboard'))
+
+            # Accept Form
             if accept_form.validate_on_submit():
+                group = Groups.query.filter_by(id=accept_form.group_id.data).first()
+                for user in group.users:
+                    notification = Notifications(user.id,
+                                                 current_user.firstname + " " + current_user.lastname + " has joined your group")
+                    db.session.add(notification)
+                user = Users.query.filter_by(id=current_user.id).first()
+                user.groups.append(group)
                 req = Requests.query.filter_by(user_origin=int(accept_form.user_origin.data),
-                                               user_destination=current_user.id).first()
+                                               user_destination=current_user.id,
+                                               group_id=accept_form.group_id.data).first()
                 req.accepted = 1
-                db.session.add(req)
+                db.session.add_all([group, req])
                 db.session.commit()
                 flash('Request Accepted')
 
-                # TODO: Add text to notify receiver if user is joining their group, if they are joining a group, or if they will have to leave their current group
-                # TODO: Call group manager handler (deletes request when complete)
-                # TODO: Notify origin user that request was accepted via email and notification (create notifications table)
                 return redirect(url_for('dashboard'))
+
+            # Range Form
             if range_form.validate_on_submit():
                 query_range = range_form.range.data
 
+        # Candidate Filter
         for user in users:
             if user.latitude and user.longitude is not None:
                 if (3959 * math.acos(math.cos(math.radians(float(current_user.latitude))) * math.cos(
@@ -149,47 +180,63 @@ def dashboard():
         )
 
 
-@app.route('/groups')
-def groups():
-    pass
+@app.route('/groups', methods=['GET', 'POST'])
+@login_required
+def list_groups():
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/groups/<join_id>', methods=['GET', 'POST'])
+def group_page(join_id):
+    if current_user.is_authenticated:
+        if Groups.query.filter(Groups.users.contains(current_user)):
+            group = Groups.query.filter_by(join_id=join_id).first()
+            return render_template('group.html', group=group, access=True)
+    else:
+        group = Groups.query.filter_by(join_id=join_id).first()
+        return render_template('group.html', group=group, access=False)
 
 
 @app.route('/groups/create', methods=['GET', 'POST'])
+@login_required
 def create_group():
     form = CreateGroupForm()
     if request.method == 'POST':
         if form.validate_on_submit():
             join_id = ''.join(random.choice(string.uppercase + string.digits) for _ in range(6))
             if Groups.query.filter_by(join_id=join_id).first() is None:
-                if request.args.get('user_destination') is not None and request.args.get('message') is not None:
-                    req = Requests(current_user.id, request.args.get('user_destination'), request.args.get('message'))
-                    db.session.add(req)
-                    flash('Request Sent')
                 group = Groups(form.name.data, join_id)
                 user = Users.query.filter_by(id=current_user.id).first()
                 group.users.append(user)
                 db.session.add(group)
                 db.session.commit()
+                if request.args.get('user_destination') is not None and request.args.get('message') is not None:
+                    group = Groups.query.filter_by(join_id=join_id).first()
+                    req = Requests(current_user.id, request.args.get('user_destination'), group.id,
+                                   request.args.get('message'))
+                    db.session.add(req)
+                    flash('Request Sent')
                 flash('Created the group ' + form.name.data)
                 return redirect(url_for('dashboard'))
     return render_template('creategroup.html', form=form)
 
 
 @app.route('/groups/join', methods=['GET', 'POST'])
+@login_required
 def join_group():
     form = JoinGroupForm()
     if request.method == 'POST':
         if form.validate_on_submit():
             group = Groups.query.filter_by(join_id=form.join_id.data).first()
             user = Users.query.filter_by(id=current_user.id).first()
-            group.users.append(user)
-            db.session.add(group)
-            db.session.commit()
-            flash('Joined the group ' + group.name)
             for user in group.users:
                 notification = Notifications(user.id,
                                              current_user.firstname + " " + current_user.lastname + " has joined your group")
                 db.session.add(notification)
+            user.groups.append(group)
+            db.session.add(group)
+            db.session.commit()
+            flash('Joined the group ' + group.name)
             db.session.commit()
             return redirect(url_for('dashboard'))
     return render_template('joingroup.html', form=form)
@@ -280,3 +327,11 @@ def verify_user(uid):
             return redirect(url_for('login'))
         else:
             return render_template('verify.html', verify_form=form)
+
+
+if DEBUG:
+    @app.route('/debug')
+    def debug():
+        # THIS IS A PURPOSEFUL DEBUG PAGE. IT BREAKS ITSELF SO THE DEBUGGER CAN BE ACCESSED.
+        raise Exception(
+            'THIS IS A PURPOSEFUL DEBUG PAGE. IT BREAKS ITSELF SO THE DEBUGGER CAN BE ACCESSED. IT IS ONLY ENABLED WHEN DEBUG=TRUE IN THE CONFIG')

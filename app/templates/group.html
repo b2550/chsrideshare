@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <table>
+        {% if access %}
+            <tr>
+                <td>Name</td>
+                <td>Who</td>
+                <td>Email</td>
+                <td>Address</td>
+            </tr>
+            {% for user in group.users %}
+                <tr>
+                    <td>{{ user.firstname }} {{ user.lastname }}</td>
+                    <td>{{ user.type }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.address }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td>Name</td>
+                <td>Who</td>
+            </tr>
+            {% for user in group.users %}
+                <tr>
+                    <td>{{ user.firstname }} {{ user.lastname|truncate(2, True, '.') }}</td>
+                    <td>{{ user.type }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+{% endblock %}

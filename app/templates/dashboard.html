@@ -9,7 +9,7 @@
         <h2>Your groups</h2>
         <ul>
             {% for group in groups %}
-                <li><a href="{{ url_for('') }}">{{ group.name }}</a></li>
+                <li><a href="{{ url_for('group_page', join_id=group.join_id) }}">{{ group.name }}</a></li>
             {% endfor %}
         </ul>
     {% endif %}
@@ -24,9 +24,9 @@
     {% endif %}
 
     {% if sent %}
-        <h2>Awaiting Response</h2>
         {% for req in sent[0].sentrequests %}
-            <p>{{ req.receiver.firstname }} {{ req.receiver.lastname }}</p>
+            <p>{{ req.receiver.firstname }} {{ req.receiver.lastname }} <input type='button' value='Awaiting Response'
+                                                                               disabled></p>
         {% endfor %}
     {% endif %}
 
@@ -54,6 +54,7 @@
             <form method="post" action="{{ url_for('dashboard') }}">
                 {{ accept_form.csrf_token }}
                 {{ accept_form.user_origin(value=req.sender.id) }}
+                {{ accept_form.group_id(value=req.group_id) }}
                 <input type="submit" value="Exchange Information">
             </form>
         {% endfor %}
