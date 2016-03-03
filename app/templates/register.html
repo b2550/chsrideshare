@@ -1,39 +1,76 @@
-{% extends "layout.html" %}
+{% from 'layout.html' import form_error %}
+{% block head %}
+    <script type="text/javascript"
+            src="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.css') }}">
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.core.js"></script>
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#goregister').click(function () {
+                $('#goregister').hide("slide", {direction: "left"});
+                $('#registerformcontainor').show("slide", {direction: "right"}, function () {
+                    $('#registerform').show("slide", {direction: "up"});
+                    $('body').css('height', $(document).height())
+                });
+            });
+        });
+    </script>
+    {# https://github.com/mebibou/mdl-selectfield #}
+{% endblock %}
 {% block body %}
     <h2>Register</h2>
-    <form method="post" action="{{ url_for('register') }}">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="goregister"
+            style="position: absolute">
+        Register
+    </button>
+    <div id="registerformcontainor">
+        <form method="post" action="{{ url_for("register") }}" id="registerform" style="display:none">
         {{ register_form.csrf_token }}
-        {{ register_form.email.label }} {{ register_form.email(size=20) }}
-        {% if register_form.email.errors %}
-            <ul class="errors">{% for error in register_form.email.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        {{ register_form.password.label }} {{ register_form.password(size=20) }}
-        {% if register_form.password.errors %}
-            <ul class="errors">{% for error in register_form.password.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        {{ register_form.passwordvalidate.label }} {{ register_form.passwordvalidate(size=20) }}
-        {% if register_form.passwordvalidate.errors %}
-            <ul class="errors">{% for error in register_form.passwordvalidate.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        {{ register_form.firstname.label }} {{ register_form.firstname(size=20) }}
-        {% if register_form.firstname.errors %}
-            <ul class="errors">{% for error in register_form.firstname.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        {{ register_form.lastname.label }} {{ register_form.lastname(size=20) }}
-        {% if register_form.lastname.errors %}
-            <ul class="errors">{% for error in register_form.lastname.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        {{ register_form.type.label }} {{ register_form.type }}
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ register_form.email(size=20, class='mdl-textfield__input') }}
+                {{ register_form.email.label(class='mdl-textfield__label') }}
+            </div>
+            {{ form_error(register_form.email) }}
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ register_form.password(size=20, class='mdl-textfield__input') }}
+                {{ register_form.password.label(class='mdl-textfield__label') }}
+                {{ form_error(register_form.password) }}
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ register_form.passwordvalidate(size=20, class='mdl-textfield__input') }}
+                {{ register_form.passwordvalidate.label(class='mdl-textfield__label') }}
+                {{ form_error(register_form.passwordvalidate) }}
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ register_form.firstname(size=20, class='mdl-textfield__input') }}
+                {{ register_form.firstname.label(class='mdl-textfield__label') }}
+                {{ form_error(register_form.firstname) }}
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ register_form.lastname(size=20, class='mdl-textfield__input') }}
+                {{ register_form.lastname.label(class='mdl-textfield__label') }}
+                {{ form_error(register_form.lastname) }}
+            </div>
+
+            <div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
+                {{ register_form.type(class='mdl-selectfield__select') }}
+                {{ register_form.type.label(class='mdl-selectfield__label') }}
+            </div>
+            <span class="mdl-textfield__error">Please select one</span>
+            {{ form_error(register_form.type) }}
+
         {{ register_form.recaptcha.label }} {{ register_form.recaptcha }}
-        {% if register_form.recaptcha.errors %}
-            <ul class="errors">{% for error in register_form.recaptcha.errors %}
-                <li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-        <input type="submit" value="Register">
+            {{ form_error(register_form.recaptcha) }}
+            <input type="submit" value="Register"
+                   class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+                   style="margin-top:16px">
     </form>
+    </div>
 {% endblock %}

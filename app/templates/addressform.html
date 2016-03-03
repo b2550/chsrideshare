@@ -1,3 +1,4 @@
+{# TODO: Add formatting #}
 {% block body %}
     <h3>Set your address</h3>
     <div id="locationField">
@@ -12,6 +13,11 @@
         {{ address_form.state(id='administrative_area_level_1') }}
         {{ address_form.zip(id='postal_code') }}
         {{ address_form.country(id='country') }}
+        {% if address_form.errors %}
+            <ul class="errors">
+                <li>That is not a valid address</li>
+            </ul>
+        {% endif %}
         <input type="submit" value="Set Address">
     </form>
 

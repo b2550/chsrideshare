@@ -12,7 +12,7 @@ RECAPTCHA_USE_SSL = True
 RECAPTCHA_PUBLIC_KEY = os.environ('APP_RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.environ('APP_RECAPTCHA_PRIVATE_KEY')
 RECAPTCHA_PARAMETERS = {}
-RECAPTCHA_DATA_ATTRS = {'theme': 'dark'}
+RECAPTCHA_DATA_ATTRS = {}  # {'theme': 'dark'}
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')

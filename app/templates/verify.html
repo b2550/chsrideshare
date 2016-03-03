@@ -1,7 +1,8 @@
+{# TODO: Add formatting and add button on homepage register div #}
 {% extends "layout.html" %}
 {% block body %}
     <h2>Resend Verification Email</h2>
-    <form method="post" action="{{ url_for('verify_user') }}">
+    <form method="post" action="{{ url_for("verify_user") }}">
         {{ verify_form.csrf_token }}
         {{ verify_form.email.label }} {{ verify_form.email(size=20) }}
         {% if verify_form.email.errors %}

@@ -3,7 +3,7 @@ from flask import url_for, Markup, flash
 from flask.ext.login import current_user
 from flask_wtf import Form, RecaptchaField, Recaptcha
 from wtforms import StringField, PasswordField, SelectField, BooleanField, HiddenField, DecimalField, TextAreaField
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
+from wtforms.validators import InputRequired, ValidationError, Email, EqualTo, AnyOf, NumberRange, Length
 from .models import *
 
 
@@ -103,8 +103,8 @@ class LoginForm(Form):
     """
     Creates a user login form when called
     Returns:
-        email: WTF Forms StringField with DataRequired validator and login_validate validator
-        password: WTF Forms PasswordField with DataRequired validator
+        email: WTF Forms StringField with InputRequired validator and login_validate validator
+        password: WTF Forms PasswordField with InputRequired validator
         remember: WTF Forms BooleanField (checkbox)
     References:
         Flask-WTF Form
@@ -112,41 +112,43 @@ class LoginForm(Form):
     Examples:
         Email and password can be passed to user database table and remember can be used to create cookie session
     """
-    email = StringField('Email', validators=[DataRequired(message="You forgot to enter your email! You ok?"),
+    email = StringField('Email', validators=[InputRequired(message="You forgot to enter your email! You ok?"),
                                              login_validate])
-    password = PasswordField('Password', validators=[DataRequired(message="You forgot to enter a password! You ok?")])
+    password = PasswordField('Password', validators=[InputRequired(message="You forgot to enter a password! You ok?")])
     remember = BooleanField('Remember Me')
 
 
 class RegisterForm(Form):
     """Creates a user registration form when called"""
-    email = StringField('Email', validators=[DataRequired(message='You need an email so we can log you in, contact you,'
+    email = StringField('Email',
+                        validators=[InputRequired(message='You need an email so we can log you in, contact you,'
                                                                   ' give you notifications, and verify your account is'
                                                                   ' not spam. Don\'t worry, we won\'t spam you or give '
                                                                   'your email away to anyone'),
-                                             Email(message='Whoops, looks like you forgot to put an @ sign or maybe a'
+                                    Email(message='Whoops, looks like you forgot to put an @ sign or maybe a'
                                                            ' .com? Just check to see if you typed that in right.'),
-                                             register_validate])
-    password = PasswordField('Password', validators=[DataRequired(
+                                    register_validate])
+    password = PasswordField('Password', validators=[InputRequired(
         message='You need a password silly, or else people can just login as you by knowing your email')])
-    firstname = StringField('First Name', validators=[DataRequired(
+    firstname = StringField('First Name', validators=[InputRequired(
         message='This is so other people know who you are. Please give us a name.')])
-    lastname = StringField('Last Name', validators=[DataRequired(
+    lastname = StringField('Last Name', validators=[InputRequired(
         message='This is so other people know who you are. Please give us a name.')])
-    passwordvalidate = PasswordField('Repeat Password', validators=[DataRequired(
+    passwordvalidate = PasswordField('Repeat Password', validators=[InputRequired(
         message='You need to fill this out! We just need to check that you didn\'t mess up your password'
                 ' by accident.'), EqualTo('password', message='Oh jeez, looks like you mistyped your password.'
                                                               ' Do me a big favor and type it in to both password'
                                                               ' boxes again so I don\'t have to reset it for you'
                                                               ' later.')])
-    type = SelectField('What are you?', choices=[('student', 'Student'), ('parent', 'Parent')])
+    type = SelectField('What are you?', choices=[('', ''), ('Student', 'Student'), ('Parent', 'Parent')],
+                       validators=[AnyOf(['Student', 'Parent'], message="Please select one")])
     recaptcha = RecaptchaField(validators=[Recaptcha(message='Something makes me think you might be a robot! Or else I '
                                                              'may have made an error... try again please.')])
 
 
 class ResendVerifyFrom(Form):
     """Creates a form to resend the user verification email when called"""
-    email = StringField('Email', validators=[DataRequired(message='You gotta enter an email!'),
+    email = StringField('Email', validators=[InputRequired(message='You gotta enter an email!'),
                                              Email(message='Whoops, looks like you forgot to put an @ sign or maybe a'
                                                            ' .com? Just check to see if you typed that in right.'),
                                              resend_verify_validate])
@@ -160,10 +162,11 @@ class ResendVerifyFrom(Form):
 # region Request System Forms
 class RequestForm(Form):
     """Creates a request form when called"""
-    user_destination = HiddenField('User ID', validators=[DataRequired(message='Error: user may not exist.'),
+    user_destination = HiddenField('User ID', validators=[InputRequired(message='Error: user may not exist.'),
                                                           request_form_validate])
-    message = TextAreaField('Message')
-    group_id = SelectField('Group', coerce=int)
+    message = TextAreaField('Message', validators=[
+        Length(max=140, message='Your message can only be the length of a Tweet (140 characters)')])
+    group_id = SelectField('Group', coerce=int, validators=[InputRequired(message='No group was given.')])
 
 
 # TODO: Integrate cancel request feature
@@ -181,8 +184,8 @@ class DenyRequestForm(Form):
 class AcceptForm(Form):
     """Creates an accept request form when called"""
     user_origin = HiddenField('Origin User ID',
-                              validators=[DataRequired(message='Error: user may not exist'), accept_form_validate])
-    group_id = HiddenField('Group ID', validators=[DataRequired(message='Group does not exist')])
+                              validators=[InputRequired(message='Error: user may not exist'), accept_form_validate])
+    group_id = HiddenField('Group ID', validators=[InputRequired(message='Group does not exist')])
 
 
 # endregion
@@ -190,12 +193,12 @@ class AcceptForm(Form):
 
 # region Group System
 class CreateGroupForm(Form):
-    name = StringField('Group Name', validators=[DataRequired(message='You must enter a group name')])
+    name = StringField('Group Name', validators=[InputRequired(message='You must enter a group name')])
 
 
 class JoinGroupForm(Form):
     join_id = StringField('Group Code',
-                          validators=[DataRequired(message='You must enter a 6 digit group code'), join_form_validate])
+                          validators=[InputRequired(message='You must enter a 6 digit group code'), join_form_validate])
 
 
 # TODO: Integrate leave group feature
@@ -219,18 +222,21 @@ class DeleteGroupForm(Form):
 
 class AddressForm(Form):
     """Creates a form to set or change a user address when called"""
-    streetnum = HiddenField('Street Number', validators=[DataRequired()])
-    streetaddress = HiddenField('Street Address', validators=[DataRequired()])
-    city = HiddenField('City', validators=[DataRequired()])
-    state = HiddenField('State', validators=[DataRequired()])
-    zip = HiddenField('Zip Code', validators=[DataRequired()])
-    country = HiddenField('Country', validators=[DataRequired()])
+    msg = ' is missing from the address'
+    streetnum = HiddenField('Street Number', validators=[InputRequired(message='Street Number' + msg)])
+    streetaddress = HiddenField('Street Address', validators=[InputRequired(message='Street Address' + msg)])
+    city = HiddenField('City', validators=[InputRequired(message='City' + msg)])
+    state = HiddenField('State', validators=[InputRequired(message='State' + msg)])
+    zip = HiddenField('Zip Code', validators=[InputRequired(message='Zip Code' + msg)])
+    country = HiddenField('Country', validators=[InputRequired(message='Country' + msg)])
 
 
 class RangeForm(Form):
     """Creates a user search range form when called"""
-    range = DecimalField('Search Radius (Miles)', places=2, validators=[DataRequired()])
+    range = DecimalField('Search Radius', places=2, validators=[InputRequired('Please enter a search radius'),
+                                                                NumberRange(min=0, max=15,
+                                                                            message='You can search up to 15 miles away')])
 
 
 class DismissNotificationForm(Form):
-    id = HiddenField('Notification ID', validators=[DataRequired('Notification doesn\'t exist')])
+    id = HiddenField('Notification ID', validators=[InputRequired('Notification doesn\'t exist')])

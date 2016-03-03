@@ -1,35 +1,145 @@
 <!DOCTYPE html>
-{% block head %}{% endblock %}
-<table>
-    <tr>
+{% macro form_error(field) -%}
+    {% if field.errors %}
+        {% for error in field.errors %}
+            {{ error }}
+        {% endfor %}
+    {% endif %}
+{%- endmacro %}
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab|Material+Icons'
+          rel='stylesheet'
+          type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <script src="{{ url_for('bower.static', filename='skrollr/dist/skrollr.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('bower.static', filename='material-design-lite/material.min.css') }}"/>
+    <script src="{{ url_for('bower.static', filename='material-design-lite/material.min.js') }}"></script>
+    <script type="text/javascript">
+        $(window).load(function () {
+            $(".si").addClass("sb");
+        });
+        $(document).ready(function () {
+            var noteshow = false;
+            $("#notebutton").click(function () {
+                if (!noteshow) {
+                    $("#notifications").fadeIn(100);
+                    noteshow = true;
+                } else {
+                    $("#notifications").hide();
+                    noteshow = false;
+                }
+                return false;
+            });
+
+            $(document).click(function () {
+                $("#notifications").hide();
+                noteshow = false;
+            });
+
+            $("#notifications").click(function () {
+                return false;
+            });
+
+            setTimeout(function () {
+                $(".si").removeClass("sb");
+            }, 5000);
+            $(".close").click(function () {
+                $(this).parent().removeClass("sb");
+            });
+            skrollr.init({
+                smoothScrolling: true
+            });
+            $(".mdl-textfield__input, .mdl-selectfield__select").blur(function () {
+                if (!this.value) {
+                    $(this).prop('required', true);
+                    $(this).parent().addClass('is-invalid');
+                }
+            });
+            $(".mdl-button[type='submit']").click(function (event) {
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").addClass('is-invalid');
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").children(".mdl-textfield__input, .mdl-selectfield__select").prop('required', true);
+            });
+        });
+    </script>
+    {% block head %}{% endblock %}
+    <title>Ride Share | {% block title %}Welcome to Ride Share{% endblock %}</title>
+</head>
+<body>
+{% if get_flashed_messages() %}
+    <div id="sb">
         {% for message in get_flashed_messages() %}
-            <td>
-                <span><b>Take Note: </b>{{ message }}</span>
-            </td>
+            <div class="si mdl-shadow--6dp">
+                <span>{{ message }}</span>
+                <button class="close"><img
+                        src="//ssl.gstatic.com/bt/C3341AA7A1A076756462EE2E5CD71C11/1x/close_white_1x.png"></button>
+                {# TODO: Switch to icon font #}
+            </div>
         {% endfor %}
+    </div>
+{% endif %}
 
-        {% for notification in g.user.notifications %}
-            <td>
-                <b>Notification: </b>
-                {{ notification.message }}
-                <form method="post" action="">
-                    {{ g.rmnote.csrf_token }}
-                    {{ g.rmnote.id(value=notification.id) }}
-                    <input type="submit" value="x">
-                </form>
-            </td>
-        {% endfor %}
+<header data-0="height: 256px; padding: 115px 16px 0; box-shadow:0 8px 10px 1px rgba(0,0,0,0),0 3px 14px 2px rgba(0,0,0,0),0 5px 5px -3px rgba(0,0,0,0)"
+        data-192="height: 64px; padding: 16px 16px 0; box-shadow:0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12),0 5px 5px -3px rgba(0,0,0,.2)">
+    {% if g.user.is_authenticated %}
+        <div class="user">
+            <span class="username">Hey, {{ g.user.firstname }}</span>
 
-        <td>
-            {% if g.user.is_authenticated %}
-                <p>Hello, {{ g.user.firstname }}</p>
-                <a href="{{ url_for('logout') }}">Logout</a>
+            {% if g.user.notifications %}
+                <span id="notebutton" class="material-icons mdl-badge mdl-badge--overlap"
+                      data-badge="{{ g.user.notifications|length }}">notifications</span>
+                <ul id="notifications" class="demo-list-item mdl-list mdl-shadow--2dp">
+                    {% for notification in g.user.notifications %}
+                        <li class="mdl-list__item">
+                        <span class="mdl-list__item-primary-content">
+                        {{ notification.message }}
+                            {# TODO: Make circle icon button #}
+                            {# TODO: Make clear all notifications in a header bar #}
+                        <form method="post" action="">
+                            {{ g.rmnote.csrf_token }}
+                            {{ g.rmnote.id(value=notification.id) }}
+                            <input type="submit" value="x">
+                        </form>
+                        </span>
+                        </li>
+                    {% endfor %}
+                </ul>
             {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Register</a>
+                <span class="material-icons" style="vertical-align: middle; text-align: center; width:32px">notifications_none</span>
             {% endif %}
-        </td>
-    </tr>
-</table>
-<h1>RideShare Dev</h1>
-{% block body %}{% endblock %}
+
+            <button id="user_options" class="mdl-button mdl-js-button mdl-button--icon">
+                <i class="material-icons">more_vert</i>
+            </button>
+            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user_options">
+                <a href="{{ url_for("logout") }}"
+                   style="text-decoration: none; font-weight: 400; color: rgba(0,0,0,.87);">
+                    <li class="mdl-menu__item">Logout</li>
+                </a>
+            </ul>
+        </div>
+    {% endif %}
+    <div class="title">
+        <a href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" data-0="height: 80px" data-192="height: 32px">
+            <img src="{{ url_for('static', filename='img/logo-l.svg') }}" data-0="height: 80px; opacity:1"
+                 data-1="opacity:0" data-192="height: 32px">
+            <img src="{{ url_for('static', filename='img/logo-s.svg') }}" data-0="height: 80px; opacity:0"
+                 data-1="opacity:1" data-192="height: 32px" style="opacity:0;">
+        </a>
+    </div>
+</header>
+
+<div id="content">
+    <div class="mdl-grid">
+        {% block body %}{% endblock %}
+    </div>
+</div>
+<footer class="mdl-mini-footer">
+    <div class="mdl-mini-footer__left-section">
+        <div class="mdl-logo"><i class="material-icons" style="vertical-align:middle; padding-right:8px">copyright</i>Copyright
+            Ride Share 2016
+        </div>
+    </div>
+</footer>
+</body>

@@ -1,5 +1,43 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block body %}
-    <h1>Welcome to Ride Share!</h1>
-    <p>This is a placeholder page for what users will see when they visit the site and are not logged in</p>
+    {% if not g.user.is_authenticated %}
+        <div class="mdl-cell mdl-cell--6-col mdl-shadow--2dp">
+            {% include "login.html" %}
+        </div>
+        <div class="mdl-cell mdl-cell--6-col mdl-shadow--2dp">
+            {% include "register.html" %}
+        </div>
+        <div class="mdl-cell mdl-cell--12-col mdl-shadow--2dp">
+            <h1>What is Ride Share?</h1>
+            <i><b>PLACEHOLDER TEXT:</b> This will have pictures and graphics and stuff</i>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultrices scelerisque semper. Mauris
+                placerat at tortor ut pellentesque. Duis nec felis sapien. Vivamus in urna ac nisl luctus venenatis non
+                vitae sapien. Nullam id est a lacus eleifend imperdiet. Nulla rhoncus neque vel varius semper.
+                Pellentesque varius nisi in lacus pulvinar imperdiet. Nullam mattis volutpat rhoncus. Nulla et massa
+                dolor. Integer finibus hendrerit tortor, et facilisis ligula tempus feugiat. Ut iaculis justo dolor, in
+                lobortis nunc tristique ac. Proin a felis quam.</p>
+            <p>Fusce vitae lacus finibus, efficitur purus sed, aliquet turpis. Nullam sodales tellus turpis, sed laoreet
+                urna ornare at. In nec odio hendrerit, dictum quam non, ultricies massa. Morbi fermentum dapibus lorem
+                ultrices lacinia. Vivamus eu eros non turpis dapibus tincidunt. Phasellus rutrum fermentum magna ut
+                lobortis. Ut id eros eu metus tincidunt aliquet.</p>
+            <p>Pellentesque porta rhoncus augue, sed maximus nibh gravida sit amet. Quisque nulla risus, aliquam eu nibh
+                varius, pretium lobortis dui. Proin posuere vestibulum nibh, sit amet pharetra diam vestibulum non.
+                Etiam eleifend faucibus mi et sollicitudin. Mauris sit amet urna in odio tempus convallis at nec orci.
+                Vivamus non vehicula orci, auctor facilisis sapien. Donec mattis blandit risus ac porttitor. Cras
+                eleifend bibendum neque, sit amet aliquet diam ultrices non.</p>
+            <p>Etiam sagittis placerat ante ut bibendum. Praesent varius blandit nulla, vel ultricies nulla aliquam
+                eget. In vestibulum blandit consectetur. Nullam cursus felis in metus ullamcorper congue. Etiam enim
+                mauris, semper vel vehicula maximus, feugiat non dolor. Pellentesque nec bibendum nulla. Maecenas ut
+                interdum sapien, eget finibus lorem. Ut sodales elementum nibh, in placerat ligula vestibulum quis.
+                Nullam non diam vel leo mollis porta non sed ligula.</p>
+            <p>Curabitur eleifend velit tincidunt vulputate efficitur. Nulla facilisi. In laoreet at elit pharetra
+                pulvinar. Donec in felis lacinia, ornare eros nec, consectetur dolor. Praesent blandit, nisl a pharetra
+                egestas, diam massa tempus dolor, non ullamcorper risus lacus a augue. Cras a ante sagittis, suscipit
+                nisl eget, porta libero. Aenean egestas sollicitudin odio, vitae tincidunt tellus tempor in. Nullam id
+                erat sodales, consequat magna non, hendrerit velit. Integer molestie aliquam purus at gravida. Morbi eu
+                ipsum aliquet, fermentum risus a, viverra urna. Pellentesque nisi elit, blandit hendrerit nisi quis,
+                elementum sagittis tortor. Nam venenatis nec est lacinia vestibulum. Etiam diam nisl, congue eu nulla
+                sed, aliquet malesuada ligula.</p>
+        </div>
+    {% endif %}
 {% endblock %}

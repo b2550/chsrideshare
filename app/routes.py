@@ -52,9 +52,12 @@ def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     else:
-        return render_template('index.html')
+        login_form = LoginForm()
+        register_form = RegisterForm()
+        return render_template('index.html', login_form=login_form, register_form=register_form)
 
 
+# region Group System
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
@@ -62,7 +65,7 @@ def dashboard():
         form = AddressForm()
         if request.method == 'POST':
             if form.validate_on_submit():
-                address = form.streetnum.data + " " + form.streetaddress.data + ", " + form.city.data + ", " + form.state.data + ", " + form.country.data
+                address = form.streetnum.data + ' ' + form.streetaddress.data + ', ' + form.city.data + ', ' + form.state.data + ', ' + form.country.data
                 user = Users.query.filter_by(email=current_user.email).first()
                 user.address = address
                 db.session.add(user)
@@ -70,7 +73,6 @@ def dashboard():
                 flash('Address Updated')
                 return redirect(url_for('dashboard'))
             else:
-                flash('That is not a valid address')
                 return render_template('dashboard.html', address_form=form)
         return render_template('dashboard.html', address_form=form)
     elif current_user.latitude is None or current_user.longitude is None:
@@ -123,11 +125,14 @@ def dashboard():
                                             message=request_form.message.data))
                 # Add user to group
                 else:
-                    req = Requests(current_user.id, request_form.user_destination.data, request_form.group_id.data,
-                                   request_form.message.data)
-                    db.session.add(req)
-                    db.session.commit()
-                    flash('Request sent')
+                    if current_user.groups.filter_by(id=request_form.group_id.data):
+                        req = Requests(current_user.id, request_form.user_destination.data, request_form.group_id.data,
+                                       request_form.message.data)
+                        db.session.add(req)
+                        db.session.commit()
+                        flash('Request sent')
+                    else:
+                        flash('An error occurred...')
                     return redirect(url_for('dashboard'))
 
             # Accept Form
@@ -135,7 +140,7 @@ def dashboard():
                 group = Groups.query.filter_by(id=accept_form.group_id.data).first()
                 for user in group.users:
                     notification = Notifications(user.id,
-                                                 current_user.firstname + " " + current_user.lastname + " has joined your group")
+                                                 current_user.firstname + ' ' + current_user.lastname + ' has joined your group')
                     db.session.add(notification)
                 user = Users.query.filter_by(id=current_user.id).first()
                 user.groups.append(group)
@@ -231,7 +236,7 @@ def join_group():
             user = Users.query.filter_by(id=current_user.id).first()
             for user in group.users:
                 notification = Notifications(user.id,
-                                             current_user.firstname + " " + current_user.lastname + " has joined your group")
+                                             current_user.firstname + ' ' + current_user.lastname + ' has joined your group')
                 db.session.add(notification)
             user.groups.append(group)
             db.session.add(group)
@@ -242,8 +247,12 @@ def join_group():
     return render_template('joingroup.html', form=form)
 
 
+# endregion
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    register_form = RegisterForm()
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     else:
@@ -252,9 +261,9 @@ def login():
             if form.validate_on_submit():
                 user = Users.query.filter_by(email=form.email.data).first()
                 login_user(user, remember=form.remember.data)
-                flash('Logged in as ' + current_user.firstname + " " + current_user.lastname)
+                flash('Logged in as ' + current_user.firstname + ' ' + current_user.lastname)
                 return redirect(url_for('index'))
-    return render_template('login.html', login_form=form)
+    return render_template('index.html', login_form=form, register_form=register_form)
 
 
 @app.route('/logout')
@@ -262,13 +271,14 @@ def logout():
     if current_user.is_authenticated:
         logout_user()
         flash('You have been logged out')
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     else:
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    login_form = LoginForm()
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     else:
@@ -282,18 +292,18 @@ def register():
                 db.session.add(user)
                 db.session.commit()
                 user = Users.query.filter_by(email=form.email.data).first()
-                msg = Message(subject="Activate CHS Ride Share Account", sender=("Ride Share",
-                                                                                 "validation@rideshare.org"))
+                msg = Message(subject='Activate CHS Ride Share Account', sender=('Ride Share',
+                                                                                 'validation@rideshare.org'))
                 msg.html = render_template('verify_email.html', suid=user)
                 msg.recipients = [form.email.data]
                 mail.send(msg)
-                flash('Registered the user ' + form.firstname.data + " " + form.lastname.data +
+                flash('Registered the user ' + form.firstname.data + ' ' + form.lastname.data +
                       '! Check your email to activate your account.')
-                return render_template('register.html', register_form=form)
+                return render_template('index.html', register_form=form, login_form=login_form)
             else:
                 flash('did not validate')
-                return render_template('register.html', register_form=form)
-    return render_template('register.html', register_form=form)
+                return render_template('index.html', register_form=form, login_form=login_form)
+    return render_template('index.html', register_form=form, login_form=login_form)
 
 
 @app.route('/verify', methods=['GET', 'POST'], defaults={'uid': 'nouser'})
@@ -315,11 +325,11 @@ def verify_user(uid):
                     flash('User Verified!')
                     return redirect(url_for('login'))
                 else:
-                    flash("Did not verify user")
+                    flash('Did not verify user')
                     return render_template('verify.html', verify_form=form)
         elif form.validate_on_submit():
             suid = Users.query.filter_by(email=form.email.data).first()
-            msg = Message(subject="Activate CHS Ride Share Account", sender=("Ride Share", "validation@rideshare.org"))
+            msg = Message(subject='Activate CHS Ride Share Account', sender=('Ride Share', 'validation@rideshare.org'))
             msg.html = render_template('verify_email.html', suid=suid)
             msg.recipients = [form.email.data]
             mail.send(msg)

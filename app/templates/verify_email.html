@@ -1,6 +1,7 @@
+{# TODO: Add formatting and make more complient with non-css email clients #}
 <p>Hello, {{ suid.firstname }}!</p>
 <h1>Welcome to Ride Share</h1>
-<p>To verify your account, <a href='{{ url_for('verify_user', uid=suid.uid, _external=True) }}'><b>Click Here</b></a>
+<p>To verify your account, <a href="{{ url_for("verify_user", uid=suid.uid, _external=True) }}"><b>Click Here</b></a>
 </p>
 <p>This is to ensure that you have used the right email when you signed up. You will not be able to log in until you
     verify. If you did not sign up for Ride Share then ignore this email.</p>

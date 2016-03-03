@@ -1,32 +1,45 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 {% block body %}
-    <table>
+    {# TODO: Fix formatting, find more info to put on page #}
+    <div class="mdl-cell mdl-cell--12-col mdl-shadow--2dp">
         {% if access %}
-            <tr>
-                <td>Name</td>
-                <td>Who</td>
-                <td>Email</td>
-                <td>Address</td>
-            </tr>
-            {% for user in group.users %}
+            <table class="mdl-data-table mdl-js-data-table">
+                <thead>
                 <tr>
-                    <td>{{ user.firstname }} {{ user.lastname }}</td>
+                    <th class="mdl-data-table__cell--non-numeric">Name</th>
+                    <th>Who</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in group.users %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ user.firstname }} {{ user.lastname }}</td>
                     <td>{{ user.type }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.address }}</td>
                 </tr>
-            {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
         {% else %}
-            <tr>
-                <td>Name</td>
-                <td>Who</td>
-            </tr>
-            {% for user in group.users %}
+            <table class="mdl-data-table mdl-js-data-table">
+                <thead>
                 <tr>
-                    <td>{{ user.firstname }} {{ user.lastname|truncate(2, True, '.') }}</td>
+                    <th class="mdl-data-table__cell--non-numeric">Name</th>
+                    <th>Who</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in group.users %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ user.firstname }} {{ user.lastname|truncate(2, True, ".") }}</td>
                     <td>{{ user.type }}</td>
                 </tr>
-            {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
-    </table>
+    </div>
 {% endblock %}

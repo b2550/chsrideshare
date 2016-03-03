@@ -1,7 +1,8 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
+{# TODO: Add formatting #}
 {% block body %}
     <h1>Join Group</h1>
-    <form method="post" action="{{ url_for('join_group') }}">
+    <form method="post" action="{{ url_for("join_group") }}">
         {{ form.csrf_token }}
         {{ form.join_id.label }} {{ form.join_id(size=6) }}
         {% if form.join_id.errors %}

@@ -1,0 +1,21 @@
+{
+  "name": "chsrideshare",
+  "version": "0.1.0",
+  "homepage": "https://github.com/b2550/chsrideshare",
+  "authors": [
+    "Ben Saltz <bensaltz@gmail.com>"
+  ],
+  "license": "GPL3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "material-design-lite": "~1.1.1",
+    "skrollr": "~0.6.30",
+    "mdl-selectfield": "0.0.3"
+  }
+}

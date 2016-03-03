@@ -70,7 +70,7 @@ class Requests(db.Model):
         self.group_id = group_id
 
     def __repr__(self):
-        return '<Request %r>' % "from " + self.user_origin + " to " + self.user_destination + " into group " + self.group_id
+        return '<Request %r>' % 'from ' + self.user_origin + ' to ' + self.user_destination + ' into group ' + self.group_id
 
 
 class Groups(db.Model):
@@ -84,7 +84,7 @@ class Groups(db.Model):
         self.join_id = join_id
 
     def __repr__(self):
-        return '<Group %r>' % self.id + " - " + self.name
+        return '<Group %r>' % self.id + ' - ' + self.name
 
 
 class Notifications(db.Model):
@@ -98,4 +98,4 @@ class Notifications(db.Model):
         self.message = message
 
     def __repr__(self):
-        return '<Notification %r>' % self.id + " - " + self.user_id
+        return '<Notification %r>' % self.id + ' - ' + self.user_id
