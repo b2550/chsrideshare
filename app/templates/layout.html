@@ -7,6 +7,7 @@
     {% endif %}
 {%- endmacro %}
 <head>
+    {# TODO: Fix slab font loading when page request is not a reload #}
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab|Material+Icons'
           rel='stylesheet'
           type='text/css'>
@@ -71,8 +72,7 @@
         {% for message in get_flashed_messages() %}
             <div class="si mdl-shadow--6dp">
                 <span>{{ message }}</span>
-                <button class="close"><img
-                        src="//ssl.gstatic.com/bt/C3341AA7A1A076756462EE2E5CD71C11/1x/close_white_1x.png"></button>
+                <button class="close"><i class="material-icons">close</i></button>
                 {# TODO: Switch to icon font #}
             </div>
         {% endfor %}

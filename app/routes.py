@@ -44,6 +44,10 @@ def unauthorized_handler():
     return render_template('test.html', output='Unauthorised')
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error.html', error=error), 404
+
 # endregion
 
 

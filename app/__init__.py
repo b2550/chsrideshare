@@ -22,3 +22,5 @@ mail = Mail(app)
 Scss(app)
 Bower(app)
 app.config['BOWER_URL_PREFIX'] = '/'
+
+app.logger.info('App initialized')
