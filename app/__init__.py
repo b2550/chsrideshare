@@ -24,3 +24,5 @@ Bower(app)
 app.config['BOWER_URL_PREFIX'] = '/'
 
 app.logger.info('App initialized')
+
+from app import routes, models
