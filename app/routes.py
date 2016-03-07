@@ -46,7 +46,7 @@ def unauthorized_handler():
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('error.html', error=error), 404
+    return render_template('404_error.html', error=error), 404
 
 # endregion
 
@@ -105,11 +105,13 @@ def dashboard():
         range_form = RangeForm()
         query_range = 1
 
-        request_form.group_id.choices = [(0, 'Create new group...')]
+        request_form.group_id.choices = [('', '')]
 
         if current_user.groups.all():
-            request_form.group_id.choices = [(group.id, group.name) for group in current_user.groups.order_by('name')]
-            request_form.group_id.choices.append((0, 'Create new group...'))
+            for group in current_user.groups.order_by('name'):
+                request_form.group_id.choices.append((str(group.id), group.name))
+
+        request_form.group_id.choices.append(('0', 'Create new group...'))
 
         canidates = []
         requests = Users.query.join(Requests, Requests.user_destination == Users.id).filter(
@@ -121,10 +123,15 @@ def dashboard():
 
         # Forms
         if request.method == 'POST':
+            # Range Form
+            if range_form.validate_on_submit():
+                query_range = range_form.range.data
+
             # Request Form
-            if request_form.validate_on_submit():
+            elif request_form.validate_on_submit():
                 # Create group
-                if request_form.group_id.data is 0:
+                app.logger.debug(request_form.group_id.data)
+                if request_form.group_id.data == '0':
                     return redirect(url_for('create_group', user_destination=request_form.user_destination.data,
                                             message=request_form.message.data))
                 # Add user to group
@@ -140,7 +147,7 @@ def dashboard():
                     return redirect(url_for('dashboard'))
 
             # Accept Form
-            if accept_form.validate_on_submit():
+            elif accept_form.validate_on_submit():
                 group = Groups.query.filter_by(id=accept_form.group_id.data).first()
                 for user in group.users:
                     notification = Notifications(user.id,
@@ -158,9 +165,6 @@ def dashboard():
 
                 return redirect(url_for('dashboard'))
 
-            # Range Form
-            if range_form.validate_on_submit():
-                query_range = range_form.range.data
 
         # Candidate Filter
         for user in users:

@@ -1,4 +1,20 @@
 {% extends "layout.html" %}
+{% block head %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".mdl-textfield__input, .mdl-selectfield__select").blur(function () {
+                if (!this.value) {
+                    $(this).prop('required', true);
+                    $(this).parent().addClass('is-invalid');
+                }
+            });
+            $(".mdl-button[type='submit']").click(function (event) {
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").addClass('is-invalid');
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").children(".mdl-textfield__input, .mdl-selectfield__select").prop('required', true);
+            });
+        });
+    </script>
+{% endblock %}
 {% block body %}
     {% if not g.user.is_authenticated %}
         <div class="mdl-cell mdl-cell--6-col mdl-shadow--2dp">

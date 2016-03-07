@@ -57,7 +57,7 @@ def request_form_validate(form, field):
                                                                                Requests.accepted < 1).all()
     group = Groups.query.filter_by(id=form['group_id'].data).first()
 
-    if group is None:
+    if group is None and form['group_id'] is '0':
         raise ValidationError('This group does not exist')
 
     for req in sent:
@@ -164,9 +164,9 @@ class RequestForm(Form):
     """Creates a request form when called"""
     user_destination = HiddenField('User ID', validators=[InputRequired(message='Error: user may not exist.'),
                                                           request_form_validate])
-    message = TextAreaField('Message', validators=[
+    message = StringField('Message', validators=[
         Length(max=140, message='Your message can only be the length of a Tweet (140 characters)')])
-    group_id = SelectField('Group', coerce=int, validators=[InputRequired(message='No group was given.')])
+    group_id = SelectField('Group', coerce=str, validators=[InputRequired(message='No group was given.')])
 
 
 # TODO: Integrate cancel request feature
@@ -193,7 +193,8 @@ class AcceptForm(Form):
 
 # region Group System
 class CreateGroupForm(Form):
-    name = StringField('Group Name', validators=[InputRequired(message='You must enter a group name')])
+    name = StringField('Group Name', validators=[InputRequired(message='You must enter a group name'),
+                                                 Length(max=30, message='Your group name can only be 30 characters')])
 
 
 class JoinGroupForm(Form):

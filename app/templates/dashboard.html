@@ -1,5 +1,28 @@
 {% extends "layout.html" %}
 {# TODO: Finish page formatting #}
+{% block head %}
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.core.js"></script>
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
+    <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".mdl-selectfield__select").blur(function () {
+                if (!this.value) {
+                    $(this).prop('required', true);
+                    $(this).parent().addClass('is-invalid');
+                }
+            });
+            $(".mdl-button[type='submit']").click(function (event) {
+                $(this).siblings(".mdl-selectfield").addClass('is-invalid');
+                $(this).siblings(".mdl-selectfield").children(".mdl-selectfield__select").prop('required', true);
+            });
+            $('#requestbtn').click(function () {
+                $('#sendrequests, #rangeform, #sentrequests').hide("slide", {direction: "left"});
+                $('#requestforms').find('.' + $(this).attr("data-showform")).show("slide", {direction: "right"});
+            });
+        });
+    </script>
+{% endblock %}
 {% block body %}
     {% if address_form %}
         <div class="mdl-cell mdl-cell--12-col mdl-shadow--2dp">
@@ -53,47 +76,89 @@
             </form>
         {% endif %}
 
-        {% if sent %}
-            <table class="requests">
-                {% for req in sent[0].sentrequests %}
+        {# TODO: Turn into notification / add formatting #}
+        <table class="requests">
+            {% if requests %}
+                {% for req in requests[0].requests %}
                     <tr>
-                        <td>{{ req.receiver.firstname }} {{ req.receiver.lastname }}</td>
-                        <td><input type="button" value="Awaiting Response" disabled></td>
+                        <td>
+                            {{ req.sender.firstname }} {{ req.sender.lastname }}
+                        </td>
+                        <td>
+                            {% if req.message %}
+                                {{ req.message }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{{ url_for("dashboard") }}">
+                                {{ accept_form.csrf_token }}
+                                {{ accept_form.user_origin(value=req.sender.id) }}
+                                {{ accept_form.group_id(value=req.group_id) }}
+                                <input type="submit" value="Exchange Information"
+                                       class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
-            </table>
-        {% endif %}
-
-        {% if canidates %}
-            {% for canidate in canidates if canidate.email != g.user.email %}
-                <form method="post" action="{{ url_for("dashboard") }}">
-                    {{ request_form.csrf_token }}
-                    <p>{{ canidate.firstname }} {{ canidate.lastname }}</p>
-                    {{ request_form.message.label }} {{ request_form.message }}
-                    {{ request_form.group_id.label }} {{ request_form.group_id }}
-                    {{ request_form.user_destination(value=canidate.id) }}
-                    <input type="submit" value="Request Information">
-                </form>
-                <p>---</p>
-            {% endfor %}
-        {% endif %}
-    </div>
-
-    {# TODO: Turn into notification / add formatting #}
-    {% if requests %}
-        <h2>Carpool Requests</h2>
-        {% for req in requests[0].requests %}
-            <p>{{ req.sender.firstname }} {{ req.sender.lastname }}</p>
-            {% if req.message %}
-                <p>{{ req.message }}</p>
             {% endif %}
-            <form method="post" action="{{ url_for("dashboard") }}">
-                {{ accept_form.csrf_token }}
-                {{ accept_form.user_origin(value=req.sender.id) }}
-                {{ accept_form.group_id(value=req.group_id) }}
-                <input type="submit" value="Exchange Information">
-            </form>
-        {% endfor %}
-    {% endif %}
+
+            {% if sent %}
+                {% for req in sent[0].sentrequests %}
+                    <tr id="sentrequests">
+                        <td>{{ req.receiver.firstname }} {{ req.receiver.lastname }}</td>
+                        <td><input type="button" value="Awaiting Response"
+                                   class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" disabled>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if canidates %}
+                {% for canidate in canidates if canidate.email != g.user.email %}
+                    <tr id="sendrequests">
+                        <td>{{ canidate.firstname }} {{ canidate.lastname }}</td>
+                        <td>
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+                                    data-showform="{{ canidate.id }}"
+                                    id="requestbtn">
+                                Request Information
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
+
+                <div id="requestforms">
+                    {% for canidate in canidates if canidate.email != g.user.email %}
+                        <form method="post" action="{{ url_for("dashboard") }}" style="display: none"
+                              class="{{ canidate.id }}">
+                            {{ request_form.csrf_token }}
+                            <p>Sending request to <b>{{ canidate.firstname }} {{ canidate.lastname }}</b></p>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                {{ request_form.message(size=20, class='mdl-textfield__input', max='140') }}
+                                {{ request_form.message.label(class='mdl-textfield__label') }}
+                            </div>
+                            {{ form_error(request_form.message) }}
+
+                            <div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label">
+                                {{ request_form.group_id(class='mdl-selectfield__select') }}
+                                {{ request_form.group_id.label(class='mdl-selectfield__label') }}
+                            </div>
+                            <span class="mdl-selectfield__error">Please select one</span>
+                            {{ form_error(request_form.group_id) }}
+
+                            {{ request_form.user_destination(value=canidate.id) }}
+                            {{ form_error(request_form.user_destination) }}
+
+                            <br>
+
+                            <input type="submit" value="Request Information"
+                                   class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
+                                   style="margin-top:16px">
+                        </form>
+                    {% endfor %}
+                </div>
+            {% endif %}
+    </div>
 
 {% endblock %}

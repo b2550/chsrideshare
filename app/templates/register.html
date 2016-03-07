@@ -1,9 +1,5 @@
 {% from 'layout.html' import form_error %}
 {% block head %}
-    <script type="text/javascript"
-            src="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.js') }}"></script>
-    <link rel="stylesheet" type="text/css"
-          href="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.css') }}">
     <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.core.js"></script>
     <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
     <script src="https://jquery-ui.googlecode.com/svn/tags/latest/ui/jquery.effects.slide.js"></script>
@@ -28,7 +24,7 @@
     </button>
     <div id="registerformcontainor">
         <form method="post" action="{{ url_for("register") }}" id="registerform" style="display:none">
-        {{ register_form.csrf_token }}
+            {{ register_form.csrf_token }}
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                 {{ register_form.email(size=20, class='mdl-textfield__input') }}
                 {{ register_form.email.label(class='mdl-textfield__label') }}
@@ -63,14 +59,14 @@
                 {{ register_form.type(class='mdl-selectfield__select') }}
                 {{ register_form.type.label(class='mdl-selectfield__label') }}
             </div>
-            <span class="mdl-textfield__error">Please select one</span>
+            <span class="mdl-selectfield__error">Please select one</span>
             {{ form_error(register_form.type) }}
 
-        {{ register_form.recaptcha.label }} {{ register_form.recaptcha }}
+            {{ register_form.recaptcha.label }} {{ register_form.recaptcha }}
             {{ form_error(register_form.recaptcha) }}
             <input type="submit" value="Register"
                    class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored"
                    style="margin-top:16px">
-    </form>
+        </form>
     </div>
 {% endblock %}

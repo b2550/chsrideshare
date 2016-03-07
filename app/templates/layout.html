@@ -11,11 +11,16 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab|Material+Icons'
           rel='stylesheet'
           type='text/css'>
+    {% include 'meta.html' %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
     <script src="{{ url_for('bower.static', filename='skrollr/dist/skrollr.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('bower.static', filename='material-design-lite/material.min.css') }}"/>
     <script src="{{ url_for('bower.static', filename='material-design-lite/material.min.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('bower.static', filename='mdl-selectfield/mdl-selectfield.min.css') }}">
     <script type="text/javascript">
         $(window).load(function () {
             $(".si").addClass("sb");
@@ -51,16 +56,6 @@
             skrollr.init({
                 smoothScrolling: true
             });
-            $(".mdl-textfield__input, .mdl-selectfield__select").blur(function () {
-                if (!this.value) {
-                    $(this).prop('required', true);
-                    $(this).parent().addClass('is-invalid');
-                }
-            });
-            $(".mdl-button[type='submit']").click(function (event) {
-                $(this).siblings(".mdl-textfield, .mdl-selectfield").addClass('is-invalid');
-                $(this).siblings(".mdl-textfield, .mdl-selectfield").children(".mdl-textfield__input, .mdl-selectfield__select").prop('required', true);
-            });
         });
     </script>
     {% block head %}{% endblock %}
@@ -73,7 +68,6 @@
             <div class="si mdl-shadow--6dp">
                 <span>{{ message }}</span>
                 <button class="close"><i class="material-icons">close</i></button>
-                {# TODO: Switch to icon font #}
             </div>
         {% endfor %}
     </div>
@@ -91,16 +85,18 @@
                 <ul id="notifications" class="demo-list-item mdl-list mdl-shadow--2dp">
                     {% for notification in g.user.notifications %}
                         <li class="mdl-list__item">
-                        <span class="mdl-list__item-primary-content">
-                        {{ notification.message }}
-                            {# TODO: Make circle icon button #}
-                            {# TODO: Make clear all notifications in a header bar #}
-                        <form method="post" action="">
-                            {{ g.rmnote.csrf_token }}
-                            {{ g.rmnote.id(value=notification.id) }}
-                            <input type="submit" value="x">
-                        </form>
-                        </span>
+                            <form method="post" action="{{ url_for('dashboard') }}">
+                            <span class="mdl-list__item-primary-content">
+                            {{ notification.message }}
+                                {# TODO: Make circle icon button #}
+                                {# TODO: Make clear all notifications in a header bar instead of individual notification removal #}
+                                {{ g.rmnote.csrf_token }}
+                                {{ g.rmnote.id(value=notification.id) }}
+                            </span>
+                                <span class="mdl-list__item-secondary-action">
+                                <input type="submit" value="x" class="mdl-button">
+                                    </span>
+                            </form>
                         </li>
                     {% endfor %}
                 </ul>
@@ -135,11 +131,11 @@
         {% block body %}{% endblock %}
     </div>
 </div>
-<footer class="mdl-mini-footer">
-    <div class="mdl-mini-footer__left-section">
-        <div class="mdl-logo"><i class="material-icons" style="vertical-align:middle; padding-right:8px">copyright</i>Copyright
-            Ride Share 2016
-        </div>
-    </div>
-</footer>
+{#<footer class="mdl-mini-footer">#}
+{#    <div class="mdl-mini-footer__left-section">#}
+{#        <div class="mdl-logo"><i class="material-icons" style="vertical-align:middle; padding-right:8px">copyright</i>Copyright#}
+{#            Ride Share 2016#}
+{#        </div>#}
+{#    </div>#}
+{#</footer>#}
 </body>

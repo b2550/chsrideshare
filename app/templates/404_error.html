@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <div class="mdl-cell mdl-cell--12-col mdl-shadow--2dp">
+        <h1>It appears you are lost</h1>
+        <p>We hate to admit it but whatever you were looking for isn't here.</p>
+        <a href="{{ url_for('index') }}">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Back to civilization
+            </button>
+        </a>
+        {#        TODO: Text adventure easter egg#}
+        {#        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">#}
+        {#            Continue into the unknown...#}
+        {#        </button>#}
+        {#        <p>If we guided you here then let us know here</p>#}
+    </div>
+{% endblock %}

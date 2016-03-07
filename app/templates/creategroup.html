@@ -1,11 +1,32 @@
 {% extends 'layout.html' %}
 {# TODO: Add formatting #}
+{% block head %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".mdl-textfield__input, .mdl-selectfield__select").blur(function () {
+                if (!this.value) {
+                    $(this).prop('required', true);
+                    $(this).parent().addClass('is-invalid');
+                }
+            });
+            $(".mdl-button[type='submit']").click(function (event) {
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").addClass('is-invalid');
+                $(this).siblings(".mdl-textfield, .mdl-selectfield").children(".mdl-textfield__input, .mdl-selectfield__select").prop('required', true);
+            });
+        });
+    </script>
+{% endblock %}
 {% block body %}
-    <h1>Create Group</h1>
-    <form method="post" action="{{ url_for('create_group') }}">
-        {{ form.csrf_token }}
-        {{ form.name.label }} {{ form.name }}
-        {{ form_error(form.name) }}
-        <input type="submit" value="Create Group">
-    </form>
+    <div class="mdl-cell mdl-cell--12-col mdl-shadow--2dp">
+        <h1>Create Group</h1>
+        <form method="post" action="{{ url_for('create_group') }}">
+            {{ form.csrf_token }}
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ form.name(class='mdl-textfield__input') }}
+                {{ form.name.label(class='mdl-textfield__label') }}
+            </div>
+            {{ form_error(form.name) }}
+            <input class="mdl-button mdl-js-button" type="submit" value="Create Group">
+        </form>
+    </div>
 {% endblock %}
