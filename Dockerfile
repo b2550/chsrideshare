@@ -13,7 +13,7 @@ ENV APP_MAIL_PASSWORD=None
 
 VOLUME ["/"]
 
-EXPOSE 8001
+EXPOSE 8000
 
 CMD [ "python", "run.py" ]
 RUN [ "python", "db_create.py" ]
