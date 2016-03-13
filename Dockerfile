@@ -11,8 +11,6 @@ ENV APP_MAIL_PORT=None
 ENV APP_MAIL_USERNAME=None
 ENV APP_MAIL_PASSWORD=None
 
-VOLUME ["/"]
-
 EXPOSE 8000
 
 CMD [ "python", "run.py" ]
