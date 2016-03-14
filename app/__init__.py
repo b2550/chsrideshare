@@ -8,8 +8,12 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, static_url_path='')
 
-app.logger.info('If app fails then check env configuration')
-app.config.from_object('config')
+try:
+    app.config.from_object('config')
+except AttributeError:
+    app.logger.warning(
+        'Enviroment config failed, trying \'noconfig.py\' file.')
+    app.config.from_object('noconfig')
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = flask_login.LoginManager()

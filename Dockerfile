@@ -14,5 +14,3 @@ ENV APP_MAIL_PASSWORD=None
 EXPOSE 8000
 
 CMD [ "python", "run.py" ]
-RUN [ "python", "db_create.py" ]
-RUN [ "python", "db_migrate.py" ]
