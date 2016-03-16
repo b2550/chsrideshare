@@ -13,11 +13,13 @@ $ cd <path to software root>/run.py
 $ python run.py
 ```
 
+You need to create the database before running this software with `$ python db_create.py`. This only needs to be done once.
+
 ## Virtual Environment
 
 `/chsrideshare` is a Python virtual environment with all the dependencies installed. The software can be run with the virtual env on GNU+Linux/UNIX following these steps:
 
-1. Navigate to Product directory in the command line `$ cd <path to software root>/run.py`
+1. Navigate to Product directory in the command line `$ cd <path to software root>`
 
 2. Run `$ chsrideshare/bin/python db_create.py` in the command line
 
